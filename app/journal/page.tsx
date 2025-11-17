@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Upload, Filter, Download, TrendingUp, TrendingDown } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Plus, Upload, Filter, Download, TrendingUp, TrendingDown, X } from 'lucide-react'
 
 export default function JournalPage() {
   const [trades, setTrades] = useState([
@@ -37,18 +37,120 @@ export default function JournalPage() {
     },
   ])
 
-  const stats = {
-    totalTrades: trades.length,
-    winRate: trades.length > 0 
-      ? (trades.filter(t => t.status === 'win').length / trades.length * 100).toFixed(1)
-      : 0,
-    totalProfit: trades.reduce((sum, t) => sum + t.profit, 0),
-    avgWin: trades.filter(t => t.status === 'win').length > 0
-      ? (trades.filter(t => t.status === 'win').reduce((sum, t) => sum + t.profit, 0) / trades.filter(t => t.status === 'win').length).toFixed(2)
-      : 0,
-    avgLoss: trades.filter(t => t.status === 'loss').length > 0
-      ? (trades.filter(t => t.status === 'loss').reduce((sum, t) => sum + t.profit, 0) / trades.filter(t => t.status === 'loss').length).toFixed(2)
-      : 0,
+  const [filters, setFilters] = useState({
+    asset: 'Tutti gli asset',
+    status: 'Tutti i risultati',
+    date: '',
+  })
+
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newTrade, setNewTrade] = useState({
+    date: new Date().toISOString().split('T')[0],
+    asset: 'EURUSD',
+    type: 'BUY',
+    entry: '',
+    exit: '',
+  })
+
+  // Filtra i trade
+  const filteredTrades = useMemo(() => {
+    return trades.filter(trade => {
+      if (filters.asset !== 'Tutti gli asset' && trade.asset !== filters.asset) return false
+      if (filters.status !== 'Tutti i risultati' && trade.status !== filters.status.toLowerCase()) return false
+      if (filters.date && trade.date !== filters.date) return false
+      return true
+    })
+  }, [trades, filters])
+
+  const stats = useMemo(() => {
+    const filtered = filteredTrades
+    const wins = filtered.filter(t => t.status === 'win')
+    const losses = filtered.filter(t => t.status === 'loss')
+    
+    return {
+      totalTrades: filtered.length,
+      winRate: filtered.length > 0 
+        ? ((wins.length / filtered.length) * 100).toFixed(1)
+        : '0',
+      totalProfit: filtered.reduce((sum, t) => sum + t.profit, 0),
+      avgWin: wins.length > 0
+        ? (wins.reduce((sum, t) => sum + t.profit, 0) / wins.length).toFixed(2)
+        : '0',
+      avgLoss: losses.length > 0
+        ? (losses.reduce((sum, t) => sum + t.profit, 0) / losses.length).toFixed(2)
+        : '0',
+    }
+  }, [filteredTrades])
+
+  const handleAddTrade = () => {
+    if (!newTrade.entry || !newTrade.exit) {
+      alert('Inserisci entry e exit!')
+      return
+    }
+
+    const entry = parseFloat(newTrade.entry)
+    const exit = parseFloat(newTrade.exit)
+    const profit = newTrade.type === 'BUY' 
+      ? Math.round((exit - entry) * 10000) / 100
+      : Math.round((entry - exit) * 10000) / 100
+
+    const trade = {
+      id: trades.length > 0 ? Math.max(...trades.map(t => t.id)) + 1 : 1,
+      date: newTrade.date,
+      asset: newTrade.asset,
+      type: newTrade.type,
+      entry: entry,
+      exit: exit,
+      profit: profit,
+      status: profit > 0 ? 'win' : 'loss',
+    }
+
+    setTrades([trade, ...trades])
+    setShowAddModal(false)
+    setNewTrade({
+      date: new Date().toISOString().split('T')[0],
+      asset: 'EURUSD',
+      type: 'BUY',
+      entry: '',
+      exit: '',
+    })
+  }
+
+  const handleImport = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv'
+    input.onchange = (e: any) => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      const reader = new FileReader()
+      reader.onload = (event: any) => {
+        const text = event.target.result
+        const lines = text.split('\n').slice(1) // Skip header
+        
+        const importedTrades = lines
+          .filter((line: string) => line.trim())
+          .map((line: string, index: number) => {
+            const [date, asset, type, entry, exit, profit, status] = line.split(',')
+            return {
+              id: trades.length + index + 1,
+              date: date.trim(),
+              asset: asset.trim(),
+              type: type.trim(),
+              entry: parseFloat(entry.trim()),
+              exit: parseFloat(exit.trim()),
+              profit: parseFloat(profit.trim()),
+              status: status.trim().toLowerCase(),
+            }
+          })
+
+        setTrades([...importedTrades, ...trades])
+        alert(`${importedTrades.length} trade importati con successo!`)
+      }
+      reader.readAsText(file)
+    }
+    input.click()
   }
 
   return (
@@ -63,26 +165,14 @@ export default function JournalPage() {
           </div>
           <div className="flex gap-3">
             <button 
-              onClick={() => alert('Funzionalità di importazione in arrivo!')}
+              onClick={handleImport}
               className="bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
             >
               <Upload size={20} />
               Importa
             </button>
             <button 
-              onClick={() => {
-                const newTrade = {
-                  id: trades.length + 1,
-                  date: new Date().toISOString().split('T')[0],
-                  asset: 'EURUSD',
-                  type: 'BUY',
-                  entry: (1.08 + Math.random() * 0.01).toFixed(4),
-                  exit: (1.08 + Math.random() * 0.01).toFixed(4),
-                  profit: Math.floor(Math.random() * 100 - 30),
-                  status: Math.random() > 0.4 ? 'win' : 'loss',
-                }
-                setTrades([newTrade, ...trades])
-              }}
+              onClick={() => setShowAddModal(true)}
               className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
             >
               <Plus size={20} />
@@ -128,28 +218,42 @@ export default function JournalPage() {
         <div className="bg-white rounded-xl p-4 mb-6 shadow flex items-center gap-4">
           <Filter size={20} className="text-gray-500" />
           <select 
-            onChange={(e) => {
-              const filtered = e.target.value === 'Tutti gli asset' 
-                ? trades 
-                : trades.filter(t => t.asset === e.target.value)
-              // Qui potresti aggiungere logica di filtraggio
-            }}
+            value={filters.asset}
+            onChange={(e) => setFilters({ ...filters, asset: e.target.value })}
             className="border border-gray-300 rounded-lg px-4 py-2"
           >
             <option>Tutti gli asset</option>
             <option>EURUSD</option>
             <option>GBPUSD</option>
             <option>USDJPY</option>
+            <option>AUDUSD</option>
+            <option>USDCAD</option>
+            <option>NZDUSD</option>
           </select>
-          <select className="border border-gray-300 rounded-lg px-4 py-2">
+          <select 
+            value={filters.status}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            className="border border-gray-300 rounded-lg px-4 py-2"
+          >
             <option>Tutti i risultati</option>
             <option>Win</option>
             <option>Loss</option>
           </select>
           <input
             type="date"
+            value={filters.date}
+            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
             className="border border-gray-300 rounded-lg px-4 py-2"
           />
+          {(filters.asset !== 'Tutti gli asset' || filters.status !== 'Tutti i risultati' || filters.date) && (
+            <button
+              onClick={() => setFilters({ asset: 'Tutti gli asset', status: 'Tutti i risultati', date: '' })}
+              className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
+            >
+              <X size={16} />
+              Reset
+            </button>
+          )}
           <button 
             onClick={() => {
               const csv = [
@@ -200,7 +304,14 @@ export default function JournalPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {trades.map((trade) => (
+              {filteredTrades.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                    Nessun trade trovato con i filtri selezionati
+                  </td>
+                </tr>
+              ) : (
+                filteredTrades.map((trade) => (
                 <tr key={trade.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {trade.date}
@@ -252,11 +363,108 @@ export default function JournalPage() {
                     </span>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Modal Aggiungi Trade */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Nuovo Trade</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Data</label>
+                <input
+                  type="date"
+                  value={newTrade.date}
+                  onChange={(e) => setNewTrade({ ...newTrade, date: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Asset</label>
+                <select
+                  value={newTrade.asset}
+                  onChange={(e) => setNewTrade({ ...newTrade, asset: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                >
+                  <option>EURUSD</option>
+                  <option>GBPUSD</option>
+                  <option>USDJPY</option>
+                  <option>AUDUSD</option>
+                  <option>USDCAD</option>
+                  <option>NZDUSD</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Tipo</label>
+                <select
+                  value={newTrade.type}
+                  onChange={(e) => setNewTrade({ ...newTrade, type: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                >
+                  <option>BUY</option>
+                  <option>SELL</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Entry</label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={newTrade.entry}
+                  onChange={(e) => setNewTrade({ ...newTrade, entry: e.target.value })}
+                  placeholder="1.0850"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Exit</label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={newTrade.exit}
+                  onChange={(e) => setNewTrade({ ...newTrade, exit: e.target.value })}
+                  placeholder="1.0875"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleAddTrade}
+                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
+                >
+                  Aggiungi
+                </button>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
