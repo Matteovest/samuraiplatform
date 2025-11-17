@@ -7,7 +7,12 @@ export default function BacktestPage() {
   const [isRunning, setIsRunning] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState('EURUSD')
   const [selectedIndicator, setSelectedIndicator] = useState('')
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    winRate: number
+    profitFactor: number
+    totalTrades: number
+    maxDrawdown: number
+  }>({
     winRate: 65,
     profitFactor: 1.85,
     totalTrades: 142,
@@ -67,7 +72,7 @@ export default function BacktestPage() {
             ...prev,
             totalTrades: newTotalTrades,
             winRate: Math.min(100, Math.max(0, newWinRate)),
-            profitFactor: (1.7 + Math.random() * 0.3).toFixed(2),
+            profitFactor: parseFloat((1.7 + Math.random() * 0.3).toFixed(2)),
           }
         })
       }, 1500)
