@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida - Come Pubblicare il Sito Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #8B0000;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .problem {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .solution-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .solution-card.easy {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .solution-card.medium {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .solution-card.hard {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        h2 {
+            color: #8B0000;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        h3 {
+            color: #333;
+            margin: 15px 0 10px;
+            font-size: 1.3rem;
+        }
+        .difficulty {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .difficulty.easy {
+            background: #28a745;
+            color: white;
+        }
+        .difficulty.medium {
+            background: #ffc107;
+            color: #333;
+        }
+        .difficulty.hard {
+            background: #dc3545;
+            color: white;
+        }
+        .steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            position: relative;
+            padding-left: 60px;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            background: #8B0000;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #8B0000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #5C0000;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .code {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .pros, .cons {
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .pros {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .cons {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .pros h4, .cons h4 {
+            margin-bottom: 10px;
+        }
+        .pros ul, .cons ul {
+            margin-left: 20px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .recommended {
+            border: 3px solid #28a745;
+            position: relative;
+        }
+        .recommended::before {
+            content: "⭐ CONSIGLIATO";
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Guida alla Pubblicazione del Sito</h1>
+        <p class="subtitle">Rendi il tuo sito accessibile a tutti - Scegli la soluzione migliore per te</p>
+
+        <div class="problem">
+            <strong>❓ Problema Attuale:</strong><br>
+            Il sito è solo un file locale sul tuo computer. Solo tu puoi vederlo aprendo il file <code>index.html</code>. 
+            Altri non possono accedervi perché non è su internet.
+        </div>
+
+        <h2>🎯 Soluzioni Disponibili</h2>
+
+        <!-- NETLIFY DROP -->
+        <div class="solution-card easy recommended">
+            <h3>1. Netlify Drop ⭐ (PIÙ SEMPLICE)</h3>
+            <span class="difficulty easy">FACILE - 2 minuti</span>
+            
+            <p>La soluzione più rapida: trascina e rilascia. Nessuna installazione necessaria!</p>
+            
+            <ol class="steps">
+                <li>Vai su <a href="https://app.netlify.com/drop" target="_blank">https://app.netlify.com/drop</a></li>
+                <li>Crea un account gratuito (o accedi con GitHub/Google)</li>
+                <li>Nell'Esplora File di Windows, apri la cartella <code>C:\Users\Matteo\.cursor</code></li>
+                <li>Seleziona i file: <code>index.html</code>, <code>styles.css</code>, <code>script.js</code></li>
+                <li>Trascina questi 3 file nella pagina Netlify Drop</li>
+                <li>Il sito sarà online in pochi secondi!</li>
+                <li>Riceverai un link tipo: <code>https://random-name.netlify.app</code></li>
+                <li>Condividi questo link con chi vuoi!</li>
+            </ol>
+
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Vantaggi</h4>
+                    <ul>
+                        <li>Gratuito</li>
+                        <li>Super veloce (2 minuti)</li>
+                        <li>Nessuna installazione</li>
+                        <li>Accessibile da tutto il mondo</li>
+                        <li>HTTPS automatico (sicuro)</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Svantaggi</h4>
+                    <ul>
+                        <li>URL lungo e casuale</li>
+                        <li>Per dominio personalizzato serve piano a pagamento</li>
+                    </ul>
+                </div>
+            </div>
+
+            <a href="https://app.netlify.com/drop" target="_blank" class="btn">🚀 Vai a Netlify Drop</a>
+        </div>
+
+        <!-- VERCEL -->
+        <div class="solution-card easy">
+            <h3>2. Vercel (Altrettanto Facile)</h3>
+            <span class="difficulty easy">FACILE - 3 minuti</span>
+            
+            <p>Simile a Netlify, con un'interfaccia moderna e veloce.</p>
+            
+            <ol class="steps">
+                <li>Vai su <a href="https://vercel.com" target="_blank">https://vercel.com</a></li>
+                <li>Registrati gratuitamente</li>
+                <li>Clicca "New Project"</li>
+                <li>Trascina la cartella del sito o seleziona i file</li>
+                <li>Il sito sarà online immediatamente!</li>
+            </ol>
+
+            <a href="https://vercel.com" target="_blank" class="btn">🚀 Vai a Vercel</a>
+        </div>
+
+        <!-- GITHUB PAGES -->
+        <div class="solution-card medium">
+            <h3>3. GitHub Pages (Più Controllo)</h3>
+            <span class="difficulty medium">MEDIO - 10 minuti</span>
+            
+            <p>Ottimo se vuoi avere controllo completo e aggiornare facilmente il sito.</p>
+            
+            <ol class="steps">
+                <li>Crea un account su <a href="https://github.com" target="_blank">GitHub.com</a> (gratuito)</li>
+                <li>Clicca su "+" in alto a destra → "New repository"</li>
+                <li>Nome repository: es. "enoteca-website"</li>
+                <li>Seleziona "Public" (necessario per il piano gratuito)</li>
+                <li>Clicca "Create repository"</li>
+                <li>Trascina i 3 file (index.html, styles.css, script.js) nella pagina</li>
+                <li>Scrivi "Initial commit" nel messaggio</li>
+                <li>Clicca "Commit changes"</li>
+                <li>Vai su Settings → Pages (nella barra laterale)</li>
+                <li>In "Source" seleziona "main" branch</li>
+                <li>Clicca "Save"</li>
+                <li>Il sito sarà su: <code>https://tuousername.github.io/enoteca-website</code></li>
+            </ol>
+
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Vantaggi</h4>
+                    <ul>
+                        <li>Gratuito</li>
+                        <li>URL personalizzabile</li>
+                        <li>Facile aggiornare (carichi nuovi file)</li>
+                        <li>Version control integrato</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Svantaggi</h4>
+                    <ul>
+                        <li>Richiede account GitHub</li>
+                        <li>Più passaggi iniziali</li>
+                    </ul>
+                </div>
+            </div>
+
+            <a href="https://github.com" target="_blank" class="btn">🚀 Vai a GitHub</a>
+        </div>
+
+        <!-- SERVER LOCALE -->
+        <div class="solution-card hard">
+            <h3>4. Server Locale (Solo nella tua rete)</h3>
+            <span class="difficulty hard">PIÙ COMPLESSO</span>
+            
+            <p>Per rendere il sito accessibile solo nella tua rete domestica/ufficio.</p>
+            
+            <div class="code">
+                <strong>Opzione A - Installa Python:</strong><br>
+                1. Scarica da: https://www.python.org/downloads/<br>
+                2. Installa (assicurati di selezionare "Add Python to PATH")<br>
+                3. Apri terminale nella cartella del sito<br>
+                4. Esegui: <code>python -m http.server 8000</code><br>
+                5. Il sito sarà su: http://localhost:8000<br>
+                6. Altri nella tua rete: http://[TUO-IP]:8000
+            </div>
+
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Vantaggi</h4>
+                    <ul>
+                        <li>Non richiede internet (solo rete locale)</li>
+                        <li>Privacy totale</li>
+                        <li>Gratuito</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Svantaggi</h4>
+                    <ul>
+                        <li>Solo accessibile nella tua rete</li>
+                        <li>Richiede installazione software</li>
+                        <li>Devi tenere il computer acceso</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>📋 Confronto Rapido</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr style="background: #f8f9fa;">
+                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Soluzione</th>
+                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Difficoltà</th>
+                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Tempo</th>
+                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Accesso</th>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>Netlify Drop</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">⭐ Facile</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">2 min</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">Mondo intero</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>Vercel</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">⭐ Facile</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">3 min</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">Mondo intero</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>GitHub Pages</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">⭐⭐ Medio</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">10 min</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">Mondo intero</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>Server Locale</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">⭐⭐⭐ Complesso</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">20+ min</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">Solo rete locale</td>
+            </tr>
+        </table>
+
+        <h2>💡 La Mia Raccomandazione</h2>
+        <div class="solution-card easy" style="background: #e7f3ff; border-color: #0d6efd;">
+            <h3>Per un'enoteca locale:</h3>
+            <p><strong>Usa Netlify Drop o Vercel</strong> - Sono le soluzioni più veloci e facili.</p>
+            <p>Il sito sarà online in pochi minuti e accessibile da qualsiasi parte del mondo. 
+            Puoi condividere il link con i clienti, metterlo su biglietti da visita, o sui social media.</p>
+            <p>Se in futuro vorrai un dominio personalizzato (es. www.enotecalocale.it), 
+            potrai sempre migrare il sito o configurare un dominio personalizzato su questi servizi.</p>
+        </div>
+
+        <h2>❓ Domande Frequenti</h2>
+        <div class="solution-card">
+            <h3>Quanto costa?</h3>
+            <p>Tutte le soluzioni elencate sono <strong>gratuite</strong>. Alcune offrono piani premium, ma per un sito statico non servono.</p>
+        </div>
+
+        <div class="solution-card">
+            <h3>Posso cambiare soluzione dopo?</h3>
+            <p>Sì! Puoi sempre migrare il sito da una piattaforma all'altra. I file rimangono gli stessi.</p>
+        </div>
+
+        <div class="solution-card">
+            <h3>E se voglio un dominio personalizzato (es. www.enotecalocale.it)?</h3>
+            <p>Puoi comprare un dominio (circa 10-15€/anno) e collegarlo a Netlify, Vercel o GitHub Pages. 
+            Tutti supportano domini personalizzati, anche nei piani gratuiti.</p>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+            <h3>Pronto a pubblicare il tuo sito? 🚀</h3>
+            <p>Scegli una delle opzioni sopra e il tuo sito sarà online in pochi minuti!</p>
+            <a href="https://app.netlify.com/drop" target="_blank" class="btn">⭐ Prova Netlify Drop (Consigliato)</a>
+            <a href="index.html" class="btn btn-secondary">← Torna al Sito</a>
+        </div>
+    </div>
+</body>
+</html>
+

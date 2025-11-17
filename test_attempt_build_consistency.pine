@@ -1,0 +1,72 @@
+//@version=6
+// TEST MINI: Errore attempt_build_setup consistency
+// Questo script dimostra l'errore e la soluzione
+
+indicator("Test attempt_build_setup Consistency", overlay=true)
+
+// Simula SetupTemplate
+type SetupTemplate
+    string id
+    int value
+
+SetupTemplate.new(string id, int value) =>
+    var tpl = SetupTemplate.new()
+    tpl.id := id
+    tpl.value := value
+    tpl
+
+// Simula array di templates
+var array<SetupTemplate> templates = array.new<SetupTemplate>()
+if barstate.isfirst
+    array.push(templates, SetupTemplate.new("A1", 1))
+    array.push(templates, SetupTemplate.new("A2", 2))
+
+// ═══════════════════════════════════════════════════════════════════════
+// ERRORE: Chiamare attempt_build_setup condizionalmente
+// ═══════════════════════════════════════════════════════════════════════
+
+// ERRATO: Questo causerà errore "should be called on each calculation"
+// attempt_build_setup_err(tpl) =>
+//     // logica...
+//     true
+// 
+// if array.size(templates) > 0
+//     for tpl in templates
+//         if some_condition
+//             attempt_build_setup_err(tpl)  // ← ERRORE: chiamata condizionale!
+// ↑ Questo NON funziona!
+
+// ═══════════════════════════════════════════════════════════════════════
+// SOLUZIONE: Chiamare SEMPRE fuori da condizioni/loop
+// ═══════════════════════════════════════════════════════════════════════
+
+// Funzione che deve essere chiamata sempre
+attempt_build_setup(SetupTemplate tpl) =>
+    // Simula logica della funzione
+    // IMPORTANTE: Questa funzione deve essere chiamata SEMPRE su ogni barra
+    result = not na(tpl.value)
+    result
+
+// Step 1: Prepara template dummy (sempre disponibile)
+var dummy_template = SetupTemplate.new("DUMMY", 0)
+dummy_tpl_used = array.size(templates) > 0 ? array.get(templates, 0) : dummy_template
+
+// Step 2: Chiama attempt_build_setup SEMPRE, fuori da ogni condizione/loop
+// CRITICAL: Questa chiamata è INCONDIZIONALE - garantisce consistency
+attempt_build_setup(dummy_tpl_used)
+
+// Step 3: Chiamata per ogni template (OPZIONALE per logica, NON per consistency)
+// IMPORTANT: La chiamata sopra (Step 2) garantisce già consistency
+// Questo loop serve solo per logica aggiuntiva
+for tpl in templates
+    // NON chiamare attempt_build_setup qui se è per consistency!
+    // È già chiamata sopra in modo incondizionale
+    // Questo loop può fare altro lavoro, ma NON per consistency
+    true  // Placeholder
+
+// ═══════════════════════════════════════════════════════════════════════
+// PATTERN CORRETTO:
+// attempt_build_setup chiamata SEMPRE fuori da if/for/while
+// Usa dummy template se necessario per garantire chiamata sempre valida
+// ═══════════════════════════════════════════════════════════════════════
+

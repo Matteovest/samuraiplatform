@@ -1,0 +1,87 @@
+GUIDA ALLE IMMAGINI DEL SITO
+============================
+
+Questa cartella contiene le immagini del sito web.
+
+📸 IMMAGINE COPERTINA (ERO SECTION):
+------------------------------------
+
+✅ negozio-copertina.jpg
+   - Foto frontale del negozio/enoteca
+   - Usata come immagine di copertina nella sezione hero
+   - Sostituisce lo sfondo rosso con l'immagine del negozio
+   - Dovrebbe mostrare l'ingresso del negozio con le insegne "VINO SFUSO" e "VINO IN BOTTIGLIA"
+
+🍷 IMMAGINI DEI VINI:
+--------------------
+
+✅ IMMAGINI DISPONIBILI (Confermate):
+-------------------------------------
+
+1. ✅ aimè-pecorino.jpg
+   - Aimè Pecorino Superiore Biologico
+   - Cascina del Colle
+   - Abruzzo DOC
+   - Vino Biologico
+
+2. ✅ bianco-grignanello.jpg
+   - Bianco di Grignanello
+   - Azienda Grignanello (Castellina in Chianti)
+   - Toscana - Vino naturale senza solfiti
+
+3. ✅ le-lase-pinot-grigio.jpg
+   - Pinot Grigio Satres (Ramato)
+   - Le Lase (Orte)
+   - Caratteristico colore salmon-pink/ramato
+
+4. ✅ donna-walda.jpg
+   - Donna Walda
+   - Ciucci Biologico
+   - Lazio IGT - Vino Bianco Biologico
+
+5. ✅ amarone-tommasi.jpg
+   - Amarone della Valpolicella Classico DOCG
+   - Tommasi (dal 1902)
+   - Etichetta elegante con design classico
+
+⚠️ IMMAGINI ANCORA MANCANTI:
+----------------------------
+
+6. ⚠️ violone-le-lase.jpg
+   - Violone DOP Tuscia
+   - Le Lase (Orte)
+   - Vino Rosso
+
+7. ⚠️ negus-cascina-del-colle.jpg
+   - Negus
+   - Cascina del Colle
+   - Montepulciano d'Abruzzo DOC
+
+IMPORTANTE:
+-----------
+
+✅ Tutte le immagini sono già correttamente referenziate nel file index.html
+✅ Il sito funziona anche senza le immagini (verranno mostrati placeholder)
+✅ Quando aggiungi le immagini mancanti, usa esattamente questi nomi di file:
+   - violone-le-lase.jpg
+   - negus-cascina-del-colle.jpg
+
+FORMATO CONSIGLIATO:
+--------------------
+- Formato: JPG o PNG
+- Dimensioni: minimo 600px larghezza, 800-1000px altezza
+- Qualità: Alta risoluzione per visualizzazione web nitida
+- Sfondo: Preferibilmente bianco o neutro
+
+NOTA:
+-----
+Il sito è completamente funzionante anche senza tutte le immagini.
+Quando le immagini sono presenti, verranno caricate automaticamente.
+Se un'immagine non viene trovata, verrà mostrato un placeholder grigio.
+
+DOPO AVER SALVATO LE IMMAGINI:
+------------------------------
+Assicurati che i file abbiano esattamente i nomi indicati sopra 
+(attenzione alle maiuscole/minuscole e ai caratteri speciali come "è" in "aimè").
+
+Il sito caricherà automaticamente le immagini quando saranno presenti in questa cartella.

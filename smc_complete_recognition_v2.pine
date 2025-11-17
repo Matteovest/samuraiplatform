@@ -1,0 +1,912 @@
+//@version=6
+indicator("SMC Complete Recognition V2", overlay=true, max_bars_back=4999, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SMC COMPLETE RECOGNITION V2 - Versione Modulare basata sul codice originale
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    INPUTS - ORDER BLOCKS                              ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+var OB_GROUP = 'Order Blocks'
+ob_length = input.int(10, 'OB Swing Lookback', minval=3, group=OB_GROUP)
+ob_useVolumePivot = input.bool(true, 'Use Volume Pivot (LuxAlgo Method)', group=OB_GROUP, tooltip="Usa volume pivot invece di swing points per identificare OB")
+ob_showBull = input.int(3, 'Show Last Bullish OB', minval=0, group=OB_GROUP)
+ob_showBear = input.int(3, 'Show Last Bearish OB', minval=0, group=OB_GROUP)
+ob_useBody = input.bool(false, 'Use Candle Body', group=OB_GROUP)
+ob_box_extension = input.int(100, 'Box Extension (bars)', minval=10, maxval=500, group=OB_GROUP, tooltip="Quante barre estendere il box dopo la candela OB")
+ob_bullCss = input.color(color.new(#2157f3, 80), 'Bullish OB', inline='bullcss', group=OB_GROUP)
+ob_bullBreakCss = input.color(color.new(#ff1100, 80), 'Bullish Break', inline='bullcss', group=OB_GROUP)
+ob_bearCss = input.color(color.new(#ff5d00, 80), 'Bearish OB', inline='bearcss', group=OB_GROUP)
+ob_bearBreakCss = input.color(color.new(#0cb51a, 80), 'Bearish Break', inline='bearcss', group=OB_GROUP)
+ob_showLabels = input.bool(true, 'Show OB/BB Labels', group=OB_GROUP, tooltip="Mostra le scritte per differenziare OB Bull/Bear e BB Bull/Bear")
+ob_showHistoricalLabels = input.bool(false, 'Show Historical Polarity Changes', group=OB_GROUP)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    INPUTS - MARKET STRUCTURE ICT                      ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+var MS_GROUP = 'Market Structure ICT'
+ms_showST = input.bool(true, 'Show Short Term Swing Points', group=MS_GROUP)
+ms_showIT = input.bool(true, 'Show Intermediate Term Swing Points', group=MS_GROUP)
+ms_showLT = input.bool(true, 'Show Long Term Swing Points', group=MS_GROUP)
+ms_labelColor = input.color(color.black, 'Label Color', group=MS_GROUP)
+
+// BOS/MSS Detection
+ms_showBOS = input.bool(true, 'Show Break of Structure (BOS)', group=MS_GROUP)
+ms_showMSS = input.bool(true, 'Show Market Structure Shift (MSS)', group=MS_GROUP)
+ms_bosBullColor = input.color(color.new(color.teal, 0), 'BOS Bull Color', inline='bos', group=MS_GROUP)
+ms_bosBearColor = input.color(color.new(color.red, 0), 'BOS Bear Color', inline='bos', group=MS_GROUP)
+ms_bosStyle = input.string('Dotted', 'BOS Style', options=['Solid', 'Dashed', 'Dotted'], inline='bos', group=MS_GROUP)
+ms_bosWidth = input.int(2, 'BOS Width', minval=1, maxval=5, inline='bos', group=MS_GROUP)
+ms_mssBullColor = input.color(color.new(color.teal, 0), 'MSS Bull Color', inline='mss', group=MS_GROUP)
+ms_mssBearColor = input.color(color.new(color.red, 0), 'MSS Bear Color', inline='mss', group=MS_GROUP)
+ms_mssStyle = input.string('Solid', 'MSS Style', options=['Solid', 'Dashed', 'Dotted'], inline='mss', group=MS_GROUP)
+ms_mssWidth = input.int(2, 'MSS Width', minval=1, maxval=5, inline='mss', group=MS_GROUP)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    UTILITY FUNCTIONS                                  ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+remove_transparency(color css) => 
+    color.rgb(color.r(css), color.g(css), color.b(css))
+
+// Funzione per ottenere lo stile della linea
+get_line_style_ms(string style) =>
+    switch style
+        'Solid' => line.style_solid
+        'Dashed' => line.style_dashed
+        'Dotted' => line.style_dotted
+        => line.style_solid
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    USER DEFINED TYPES                                 ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// Order Blocks UDTs - usa time (timestamp assoluto) per ancoraggio fisso
+type ob
+    float top = na
+    float btm = na
+    int loc_time = na  // time (timestamp) assoluto della candela OB
+    int loc_bar = na  // bar_index assoluto della candela OB (per calcoli)
+    bool breaker = false
+    int break_time = na  // time (timestamp) assoluto della candela di break
+    int break_bar = na  // bar_index assoluto della candela di break
+    box ob_box = na  // Riferimento al box OB
+    box bb_box = na  // Riferimento al box BB
+    line center_line = na  // Linea centrale del box (50% del range)
+    label ob_label = na  // Label per OB
+    label bb_label = na  // Label per BB
+
+type swing
+    float y = na
+    int x = na
+    bool crossed = false
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    VARIABLES                                          ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+var array<ob> bullish_ob = array.new<ob>()
+var array<ob> bearish_ob = array.new<ob>()
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    FUNCTIONS - ORDER BLOCKS                           ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// Funzione swings() come nel codice originale
+swings(len) =>
+    var os = 0
+    var swing top = swing.new(na, na)
+    var swing btm = swing.new(na, na)
+    upper = ta.highest(len)
+    lower = ta.lowest(len)
+    os := high[len] > upper ? 0 : low[len] < lower ? 1 : os
+    if os == 0 and os[1] != 0
+        top := swing.new(high[len], bar_index[len])
+    if os == 1 and os[1] != 1
+        btm := swing.new(low[len], bar_index[len])
+    [top, btm]
+
+// Crea box OB quando viene trovato (una volta sola, IMMEDIATAMENTE)
+// IMPORTANTE: usa SOLO timestamp assoluto salvato, mai time corrente
+create_ob_box(ob id, color css, bool is_bull) =>
+    if na(id.ob_box) and not na(id.loc_time) and not na(id.top) and not na(id.btm) and id.top > id.btm
+        // Calcola estremi FISSI usando SOLO timestamp salvato (valori assoluti, NON cambiano mai)
+        ob_start_time = id.loc_time  // time (timestamp) assoluto della candela OB (FISSO - NON cambia mai)
+        // Crea box con estensione a destra - non si muoverà mai, anche se trascini il grafico
+        // NON usare mai time corrente o bar_index corrente qui!
+        id.ob_box := box.new(ob_start_time, id.top, ob_start_time, id.btm, border_color=remove_transparency(css), bgcolor=css, xloc=xloc.bar_time, extend=extend.right)
+        // Crea linea centrale (50% del range) con estensione a destra
+        center_price = (id.top + id.btm) / 2
+        // Usa un piccolo offset per x2 per assicurarsi che la linea sia orizzontale
+        tf_ms = timeframe.in_seconds() * 1000  // Variabile locale per evitare shadowing
+        ob_end_time = ob_start_time + tf_ms  // Offset di 1 barra per rendere la linea orizzontale
+        id.center_line := line.new(ob_start_time, center_price, ob_end_time, center_price, color=remove_transparency(css), style=line.style_solid, width=1, xloc=xloc.bar_time, extend=extend.right)
+        // Crea label per OB se abilitato - dentro il box, a destra, al centro verticale
+        if ob_showLabels
+            label_text = is_bull ? "OB Bull" : "OB Bear"
+            // Posiziona la label dentro il box, a destra, al centro verticale
+            // Usa un offset temporale per posizionare la label più a destra nel box
+            label_offset_time = int(ob_start_time + (ob_box_extension * tf_ms * 0.8))  // 80% dell'estensione per posizionarla a destra
+            id.ob_label := label.new(label_offset_time, center_price, label_text, color=color.new(remove_transparency(css), 80), textcolor=remove_transparency(css), style=label.style_label_center, size=size.small, xloc=xloc.bar_time)
+
+// Converte OB in BB quando viene rotto (una volta sola, IMMEDIATAMENTE quando viene rilevato il break)
+// IMPORTANTE: usa SOLO timestamp assoluto salvato, mai time corrente
+convert_to_breaker(ob id, color css, color break_css, bool is_bull) =>
+    if id.breaker and na(id.bb_box) and not na(id.break_time) and not na(id.top) and not na(id.btm) and id.top > id.btm
+        // Cancella box OB, linea centrale e label OB
+        if not na(id.ob_box)
+            box.delete(id.ob_box)
+            id.ob_box := na
+        if not na(id.center_line)
+            line.delete(id.center_line)
+            id.center_line := na
+        if not na(id.ob_label)
+            label.delete(id.ob_label)
+            id.ob_label := na
+        // Calcola estremi FISSI usando SOLO timestamp salvato (valori assoluti, NON cambiano mai)
+        bb_start_time = id.break_time  // time (timestamp) assoluto della candela di break (FISSO - NON cambia mai)
+        // Crea box BB con estensione a destra - non si muoverà mai, anche se trascini il grafico
+        // NON usare mai time corrente o bar_index corrente qui!
+        id.bb_box := box.new(bb_start_time, id.top, bb_start_time, id.btm, border_color=remove_transparency(break_css), bgcolor=break_css, xloc=xloc.bar_time, extend=extend.right)
+        // Crea linea centrale (50% del range) con estensione a destra
+        center_price = (id.top + id.btm) / 2
+        // Usa un piccolo offset per x2 per assicurarsi che la linea sia orizzontale
+        tf_ms = timeframe.in_seconds() * 1000  // Variabile locale per evitare shadowing
+        bb_end_time = bb_start_time + tf_ms  // Offset di 1 barra per rendere la linea orizzontale
+        id.center_line := line.new(bb_start_time, center_price, bb_end_time, center_price, color=remove_transparency(break_css), style=line.style_solid, width=1, xloc=xloc.bar_time, extend=extend.right)
+        // Crea label per BB se abilitato - dentro il box, a destra, al centro verticale
+        if ob_showLabels
+            label_text = is_bull ? "BB Bull" : "BB Bear"
+            // Posiziona la label dentro il box, a destra, al centro verticale
+            // Usa un offset temporale per posizionare la label più a destra nel box
+            label_offset_time = int(bb_start_time + (ob_box_extension * tf_ms * 0.8))  // 80% dell'estensione per posizionarla a destra
+            id.bb_label := label.new(label_offset_time, center_price, label_text, color=color.new(remove_transparency(break_css), 80), textcolor=remove_transparency(break_css), style=label.style_label_center, size=size.small, xloc=xloc.bar_time)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    DELETE OLD DRAWINGS                                ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+// NON cancelliamo più i box ogni barra - vengono creati una volta sola
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    ORDER BLOCKS DETECTION                             ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+n = bar_index
+max = ob_useBody ? math.max(close, open) : high
+min = ob_useBody ? math.min(close, open) : low
+
+// Logica basata su Volume Pivot (LuxAlgo) o Swing Points
+var os = 0
+upper = ta.highest(ob_length)
+lower = ta.lowest(ob_length)
+os := high[ob_length] > upper ? 0 : low[ob_length] < lower ? 1 : os[1]
+
+// Volume Pivot detection (LuxAlgo method)
+phv = ta.pivothigh(volume, ob_length, ob_length)
+plv = ta.pivotlow(volume, ob_length, ob_length)
+
+// Swing Points detection (metodo originale)
+[top, btm] = swings(ob_length)
+
+// Bullish Order Blocks - Logica migliorata basata su LuxAlgo
+bull_break_conf = 0
+bull_ob_detected = false
+
+// Metodo Volume Pivot (LuxAlgo)
+if ob_useVolumePivot and not na(phv) and os == 1
+    // Usa hl2[length] come top e low[length] come bottom (metodo LuxAlgo)
+    green_top = hl2[ob_length]
+    green_btm = low[ob_length]
+    green_time = time[ob_length]
+    green_bar = bar_index[ob_length]
+    
+    if not na(green_top) and not na(green_btm) and green_top > green_btm
+        new_ob = ob.new(green_top, green_btm, green_time, green_bar, false, na, na, na, na, na, na)
+        array.unshift(bullish_ob, new_ob)
+        create_ob_box(new_ob, ob_bullCss, true)
+        bull_ob_detected := true
+
+// Metodo Swing Points (originale) - solo se non usiamo volume pivot o se non è stato trovato
+if not ob_useVolumePivot or (not bull_ob_detected and close > top.y and not top.crossed)
+    if close > top.y and not top.crossed
+        top.crossed := true
+        // Cerca la prima candela verde (close > open) prima dello swing break
+        float green_top = na
+        float green_btm = na
+        int green_time = na
+        int green_bar = na
+        found_green = false
+        
+        // Cerca dalla candela precedente fino alla candela dello swing
+        for i = 1 to (n - top.x) - 1
+            if close[i] > open[i] and not found_green
+                // Prima candela verde trovata
+                green_top := ob_useBody ? math.max(close[i], open[i]) : high[i]
+                green_btm := ob_useBody ? math.min(close[i], open[i]) : low[i]
+                green_time := time[i]  // time (timestamp) assoluto
+                green_bar := bar_index[i]  // bar_index assoluto (per calcoli)
+                found_green := true
+            else if found_green
+                // Se abbiamo già trovato una candela verde, aggiorna se questa ha un range più ampio
+                current_top = ob_useBody ? math.max(close[i], open[i]) : high[i]
+                current_btm = ob_useBody ? math.min(close[i], open[i]) : low[i]
+                if close[i] > open[i] and (current_top > green_top or current_btm < green_btm)
+                    green_top := current_top
+                    green_btm := current_btm
+                    green_time := time[i]
+                    green_bar := bar_index[i]
+        
+        // Se non troviamo una candela verde, usa la logica originale
+        if not found_green
+            green_top := max[1]
+            green_btm := min[1]
+            green_time := time[1]
+            green_bar := bar_index[1]
+            for i = 1 to (n - top.x) - 1
+                current_min = min[i]
+                current_max = max[i]
+                if current_min < green_btm
+                    green_btm := current_min
+                    green_top := current_max
+                    green_time := time[i]
+                    green_bar := bar_index[i]
+        
+        if not na(green_top) and not na(green_btm) and green_top > green_btm
+            new_ob = ob.new(green_top, green_btm, green_time, green_bar, false, na, na, na, na, na, na)
+            array.unshift(bullish_ob, new_ob)
+            create_ob_box(new_ob, ob_bullCss, true)
+
+if array.size(bullish_ob) > 0
+    for i = array.size(bullish_ob) - 1 to 0
+        element = array.get(bullish_ob, i)
+        if not element.breaker
+            if math.min(close, open) < element.btm
+                element.breaker := true
+                element.break_time := time  // time (timestamp) assoluto della barra corrente (salvato una volta)
+                element.break_bar := bar_index  // bar_index assoluto (per calcoli)
+                // Converti in BB IMMEDIATAMENTE quando viene rotto (una volta sola)
+                convert_to_breaker(element, ob_bullCss, ob_bullBreakCss, true)
+        else
+            if close > element.top
+                // Cancella box, linea e label prima di rimuovere
+                if not na(element.ob_box)
+                    box.delete(element.ob_box)
+                if not na(element.bb_box)
+                    box.delete(element.bb_box)
+                if not na(element.center_line)
+                    line.delete(element.center_line)
+                if not na(element.ob_label)
+                    label.delete(element.ob_label)
+                if not na(element.bb_label)
+                    label.delete(element.bb_label)
+                array.remove(bullish_ob, i)
+            else if i < ob_showBull and top.y < element.top and top.y > element.btm
+                bull_break_conf := 1
+
+// Set label for bullish break (historical polarity change)
+if bull_break_conf > bull_break_conf[1] and ob_showHistoricalLabels
+    label.new(top.x, top.y, '▼', color=na, textcolor=remove_transparency(ob_bearCss), style=label.style_label_down, size=size.tiny, xloc=xloc.bar_index)
+
+// Bearish Order Blocks - Logica migliorata basata su LuxAlgo
+bear_break_conf = 0
+bear_ob_detected = false
+
+// Metodo Volume Pivot (LuxAlgo)
+if ob_useVolumePivot and not na(plv) and os == 0
+    // Usa high[length] come top e hl2[length] come bottom (metodo LuxAlgo)
+    red_top = high[ob_length]
+    red_btm = hl2[ob_length]
+    red_time = time[ob_length]
+    red_bar = bar_index[ob_length]
+    
+    if not na(red_top) and not na(red_btm) and red_top > red_btm
+        new_ob = ob.new(red_top, red_btm, red_time, red_bar, false, na, na, na, na, na, na)
+        array.unshift(bearish_ob, new_ob)
+        create_ob_box(new_ob, ob_bearCss, false)
+        bear_ob_detected := true
+
+// Metodo Swing Points (originale) - solo se non usiamo volume pivot o se non è stato trovato
+if not ob_useVolumePivot or (not bear_ob_detected and close < btm.y and not btm.crossed)
+    if close < btm.y and not btm.crossed
+        btm.crossed := true
+        // Cerca la prima candela rossa (close < open) prima dello swing break
+        float red_top = na
+        float red_btm = na
+        int red_time = na
+        int red_bar = na
+        found_red = false
+        
+        // Cerca dalla candela precedente fino alla candela dello swing
+        for i = 1 to (n - btm.x) - 1
+            if close[i] < open[i] and not found_red
+                // Prima candela rossa trovata
+                red_top := ob_useBody ? math.max(close[i], open[i]) : high[i]
+                red_btm := ob_useBody ? math.min(close[i], open[i]) : low[i]
+                red_time := time[i]  // time (timestamp) assoluto
+                red_bar := bar_index[i]  // bar_index assoluto (per calcoli)
+                found_red := true
+            else if found_red
+                // Se abbiamo già trovato una candela rossa, aggiorna se questa ha un range più ampio
+                current_top = ob_useBody ? math.max(close[i], open[i]) : high[i]
+                current_btm = ob_useBody ? math.min(close[i], open[i]) : low[i]
+                if close[i] < open[i] and (current_top > red_top or current_btm < red_btm)
+                    red_top := current_top
+                    red_btm := current_btm
+                    red_time := time[i]
+                    red_bar := bar_index[i]
+        
+        // Se non troviamo una candela rossa, usa la logica originale
+        if not found_red
+            red_top := max[1]
+            red_btm := min[1]
+            red_time := time[1]
+            red_bar := bar_index[1]
+            for i = 1 to (n - btm.x) - 1
+                current_max = max[i]
+                current_min = min[i]
+                if current_max > red_top
+                    red_top := current_max
+                    red_btm := current_min
+                    red_time := time[i]
+                    red_bar := bar_index[i]
+        
+        if not na(red_top) and not na(red_btm) and red_top > red_btm
+            new_ob = ob.new(red_top, red_btm, red_time, red_bar, false, na, na, na, na, na, na)
+            array.unshift(bearish_ob, new_ob)
+            create_ob_box(new_ob, ob_bearCss, false)
+
+if array.size(bearish_ob) > 0
+    for i = array.size(bearish_ob) - 1 to 0
+        element = array.get(bearish_ob, i)
+        if not element.breaker
+            if math.max(close, open) > element.top
+                element.breaker := true
+                element.break_time := time  // time (timestamp) assoluto della barra corrente (salvato una volta)
+                element.break_bar := bar_index  // bar_index assoluto (per calcoli)
+                // Converti in BB IMMEDIATAMENTE quando viene rotto (una volta sola)
+                convert_to_breaker(element, ob_bearCss, ob_bearBreakCss, false)
+        else
+            if close < element.btm
+                // Cancella box, linea e label prima di rimuovere
+                if not na(element.ob_box)
+                    box.delete(element.ob_box)
+                if not na(element.bb_box)
+                    box.delete(element.bb_box)
+                if not na(element.center_line)
+                    line.delete(element.center_line)
+                if not na(element.ob_label)
+                    label.delete(element.ob_label)
+                if not na(element.bb_label)
+                    label.delete(element.bb_label)
+                array.remove(bearish_ob, i)
+            else if i < ob_showBear and btm.y > element.btm and btm.y < element.top
+                bear_break_conf := 1
+
+// Set label for bearish break (historical polarity change)
+if bear_break_conf > bear_break_conf[1] and ob_showHistoricalLabels
+    label.new(btm.x, btm.y, '▲', color=na, textcolor=remove_transparency(ob_bullCss), style=label.style_label_up, size=size.tiny, xloc=xloc.bar_index)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    DRAW ORDER BLOCKS                                  ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+// I box vengono creati quando vengono trovati, non vengono ridisegnati
+// Gestisci solo la conversione in BB quando necessario
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    FUNCTIONS - MARKET STRUCTURE ICT                   ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// Metodo per identificare swing vecchi
+method oldSwing(array<label> a, string type) =>
+    if type == "high"
+        array.size(a) >= 3 and label.get_y(array.get(a, array.size(a) - 1)) < label.get_y(array.get(a, array.size(a) - 2)) and label.get_y(array.get(a, array.size(a) - 2)) > label.get_y(array.get(a, array.size(a) - 3))
+    else if type == "low"
+        array.size(a) >= 3 and label.get_y(array.get(a, array.size(a) - 1)) > label.get_y(array.get(a, array.size(a) - 2)) and label.get_y(array.get(a, array.size(a) - 2)) < label.get_y(array.get(a, array.size(a) - 3))
+    else
+        false
+
+// Funzione principale per identificare la struttura di swing
+// Accetta swingBars come parametro (calcolato fuori per consistenza)
+ict_SwingStructure(array<label> stA, bool showST, array<label> itA, bool showIT, array<label> ltA, bool showLT, string type, int swingBars, float swingPrice, int swingTime) =>
+    color cNONE = color.new(color.white, 100)
+    string _st = na
+    string _it = na
+    string _lt = na
+    lbl = label.style_label_down  // Inizializza con un valore di default
+    
+    if type == "high"
+        _st := showST ? "." : na
+        _it := showIT ? "△" : na
+        _lt := showLT ? "▲" : na
+        lbl := label.style_label_down
+    else if type == "low"
+        _st := showST ? "." : na
+        _it := showIT ? "▽" : na
+        _lt := showLT ? "▼" : na
+        lbl := label.style_label_up
+    
+    if swingBars == -1
+        array.push(stA, label.new(bar_index - 1, swingPrice, _st, yloc=yloc.price, color=cNONE, style=lbl, textcolor=ms_labelColor, xloc=xloc.bar_index))
+    
+    if array.size(stA) > 2
+        if stA.oldSwing(type)
+            it = label.copy(array.get(stA, array.size(stA) - 2))
+            label.set_text(it, _it)
+            if array.size(itA) == 0
+                array.push(itA, it)
+            else if label.get_y(array.get(itA, array.size(itA) - 1)) != label.get_y(it)
+                array.push(itA, it)
+    
+    if array.size(itA) > 2
+        if itA.oldSwing(type)
+            lt = label.copy(array.get(itA, array.size(itA) - 2))
+            label.set_text(lt, _lt)
+            if array.size(ltA) == 0
+                array.push(ltA, lt)
+            else if label.get_y(array.get(ltA, array.size(ltA) - 1)) != label.get_y(lt)
+                array.push(ltA, lt)
+
+// Funzione principale per Market Structure
+ict_SimpleMarketStructure(array<label> stH, array<label> stL, bool showST, array<label> itH, array<label> itL, bool showIT, array<label> ltH, array<label> ltL, bool showLT, int swingBarsHigh, float swingPriceHigh, int swingTimeHigh, int swingBarsLow, float swingPriceLow, int swingTimeLow) =>
+    ict_SwingStructure(stH, showST, itH, showIT, ltH, showLT, "high", swingBarsHigh, swingPriceHigh, swingTimeHigh)
+    ict_SwingStructure(stL, showST, itL, showIT, ltL, showLT, "low", swingBarsLow, swingPriceLow, swingTimeLow)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    VARIABLES - MARKET STRUCTURE ICT                   ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+var array<label> stHigh = array.new<label>()
+var array<label> itHigh = array.new<label>()
+var array<label> ltHigh = array.new<label>()
+var array<label> stLow = array.new<label>()
+var array<label> itLow = array.new<label>()
+var array<label> ltLow = array.new<label>()
+
+// Variabili per tracciare gli ultimi swing per BOS/MSS
+var float lastSTHigh = na
+var float lastITHigh = na
+var float lastLTHigh = na
+var float lastSTLow = na
+var float lastITLow = na
+var float lastLTLow = na
+var int lastSTHighBar = na
+var int lastITHighBar = na
+var int lastLTHighBar = na
+var int lastSTLowBar = na
+var int lastITLowBar = na
+var int lastLTLowBar = na
+var int lastSTHighTime = na  // Timestamp per visualizzazione
+var int lastITHighTime = na
+var int lastLTHighTime = na
+var int lastSTLowTime = na
+var int lastITLowTime = na
+var int lastLTLowTime = na
+
+// Flag per tracciare quali swing sono già stati rotti (per evitare duplicati)
+var bool stHighBroken = false
+var bool itHighBroken = false
+var bool ltHighBroken = false
+var bool stLowBroken = false
+var bool itLowBroken = false
+var bool ltLowBroken = false
+
+// Array per linee BOS/MSS
+var array<line> bosLines = array.new<line>()
+var array<line> mssLines = array.new<line>()
+var array<label> mssLabels = array.new<label>()
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    MARKET STRUCTURE ICT DETECTION                     ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// Calcola swing bars nel main execution block per consistenza (ad ogni barra)
+swingBarsHigh = ta.highestbars(3)
+swingBarsLow = ta.lowestbars(3)
+swingPriceHigh = high[1]
+swingPriceLow = low[1]
+swingTimeHigh = time[1]
+swingTimeLow = time[1]
+
+ict_SimpleMarketStructure(stHigh, stLow, ms_showST, itHigh, itLow, ms_showIT, ltHigh, ltLow, ms_showLT, swingBarsHigh, swingPriceHigh, swingTimeHigh, swingBarsLow, swingPriceLow, swingTimeLow)
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    BOS/MSS DETECTION                                  ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// Aggiorna gli ultimi swing quando vengono creati nuovi e resetta i flag di break
+// Usa array paralleli per salvare timestamp quando vengono creati gli swing
+var array<int> stHighTimes = array.new<int>()
+var array<int> itHighTimes = array.new<int>()
+var array<int> ltHighTimes = array.new<int>()
+var array<int> stLowTimes = array.new<int>()
+var array<int> itLowTimes = array.new<int>()
+var array<int> ltLowTimes = array.new<int>()
+
+// Salva timestamp quando viene creato un nuovo swing ST High
+if array.size(stHigh) > 0 and (array.size(stHighTimes) < array.size(stHigh))
+    array.push(stHighTimes, time[1])
+
+if array.size(stHigh) > 0
+    lastSTLabel = array.get(stHigh, array.size(stHigh) - 1)
+    if not na(lastSTLabel) and array.size(stHighTimes) > 0
+        currentSTHigh = label.get_y(lastSTLabel)
+        currentSTHighBar = label.get_x(lastSTLabel)
+        currentSTHighTime = array.get(stHighTimes, array.size(stHighTimes) - 1)
+        // Se è un nuovo swing (diverso dal precedente), resetta il flag
+        if currentSTHigh != lastSTHigh or currentSTHighBar != lastSTHighBar
+            stHighBroken := false
+        lastSTHigh := currentSTHigh
+        lastSTHighBar := currentSTHighBar
+        lastSTHighTime := currentSTHighTime
+
+// Salva timestamp quando viene creato un nuovo swing IT High
+if array.size(itHigh) > 0 and (array.size(itHighTimes) < array.size(itHigh))
+    // Il timestamp viene copiato dalla label ST corrispondente
+    if array.size(stHighTimes) >= 2
+        array.push(itHighTimes, array.get(stHighTimes, array.size(stHighTimes) - 2))
+
+if array.size(itHigh) > 0
+    lastITLabel = array.get(itHigh, array.size(itHigh) - 1)
+    if not na(lastITLabel) and array.size(itHighTimes) > 0
+        currentITHigh = label.get_y(lastITLabel)
+        currentITHighBar = label.get_x(lastITLabel)
+        currentITHighTime = array.get(itHighTimes, array.size(itHighTimes) - 1)
+        if currentITHigh != lastITHigh or currentITHighBar != lastITHighBar
+            itHighBroken := false
+        lastITHigh := currentITHigh
+        lastITHighBar := currentITHighBar
+        lastITHighTime := currentITHighTime
+
+// Salva timestamp quando viene creato un nuovo swing LT High
+if array.size(ltHigh) > 0 and (array.size(ltHighTimes) < array.size(ltHigh))
+    // Il timestamp viene copiato dalla label IT corrispondente
+    if array.size(itHighTimes) >= 2
+        array.push(ltHighTimes, array.get(itHighTimes, array.size(itHighTimes) - 2))
+
+if array.size(ltHigh) > 0
+    lastLTLabel = array.get(ltHigh, array.size(ltHigh) - 1)
+    if not na(lastLTLabel) and array.size(ltHighTimes) > 0
+        currentLTHigh = label.get_y(lastLTLabel)
+        currentLTHighBar = label.get_x(lastLTLabel)
+        currentLTHighTime = array.get(ltHighTimes, array.size(ltHighTimes) - 1)
+        if currentLTHigh != lastLTHigh or currentLTHighBar != lastLTHighBar
+            ltHighBroken := false
+        lastLTHigh := currentLTHigh
+        lastLTHighBar := currentLTHighBar
+        lastLTHighTime := currentLTHighTime
+
+// Salva timestamp quando viene creato un nuovo swing ST Low
+if array.size(stLow) > 0 and (array.size(stLowTimes) < array.size(stLow))
+    array.push(stLowTimes, time[1])
+
+if array.size(stLow) > 0
+    lastSTLabel = array.get(stLow, array.size(stLow) - 1)
+    if not na(lastSTLabel) and array.size(stLowTimes) > 0
+        currentSTLow = label.get_y(lastSTLabel)
+        currentSTLowBar = label.get_x(lastSTLabel)
+        currentSTLowTime = array.get(stLowTimes, array.size(stLowTimes) - 1)
+        if currentSTLow != lastSTLow or currentSTLowBar != lastSTLowBar
+            stLowBroken := false
+        lastSTLow := currentSTLow
+        lastSTLowBar := currentSTLowBar
+        lastSTLowTime := currentSTLowTime
+
+// Salva timestamp quando viene creato un nuovo swing IT Low
+if array.size(itLow) > 0 and (array.size(itLowTimes) < array.size(itLow))
+    if array.size(stLowTimes) >= 2
+        array.push(itLowTimes, array.get(stLowTimes, array.size(stLowTimes) - 2))
+
+if array.size(itLow) > 0
+    lastITLabel = array.get(itLow, array.size(itLow) - 1)
+    if not na(lastITLabel) and array.size(itLowTimes) > 0
+        currentITLow = label.get_y(lastITLabel)
+        currentITLowBar = label.get_x(lastITLabel)
+        currentITLowTime = array.get(itLowTimes, array.size(itLowTimes) - 1)
+        if currentITLow != lastITLow or currentITLowBar != lastITLowBar
+            itLowBroken := false
+        lastITLow := currentITLow
+        lastITLowBar := currentITLowBar
+        lastITLowTime := currentITLowTime
+
+// Salva timestamp quando viene creato un nuovo swing LT Low
+if array.size(ltLow) > 0 and (array.size(ltLowTimes) < array.size(ltLow))
+    if array.size(itLowTimes) >= 2
+        array.push(ltLowTimes, array.get(itLowTimes, array.size(itLowTimes) - 2))
+
+if array.size(ltLow) > 0
+    lastLTLabel = array.get(ltLow, array.size(ltLow) - 1)
+    if not na(lastLTLabel) and array.size(ltLowTimes) > 0
+        currentLTLow = label.get_y(lastLTLabel)
+        currentLTLowBar = label.get_x(lastLTLabel)
+        currentLTLowTime = array.get(ltLowTimes, array.size(ltLowTimes) - 1)
+        if currentLTLow != lastLTLow or currentLTLowBar != lastLTLowBar
+            ltLowBroken := false
+        lastLTLow := currentLTLow
+        lastLTLowBar := currentLTLowBar
+        lastLTLowTime := currentLTLowTime
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    BOS DETECTION                                      ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+// BOS = Break of Structure: rottura di un singolo massimo o minimo su un singolo timeframe
+// 
+// ═══════════════════════════════════════════════════════════════════════
+// REGOLA OPERATIVA - CORRISPONDENZA SIMBOLI:
+// ═══════════════════════════════════════════════════════════════════════
+// "." (punto) = ST (Short Term) → BOS di breve termine
+// "△/▽" (triangolo) = IT (Intermediate Term) → BOS intermedio (conferma struttura)
+// "▲/▼" (triangolo grande) = LT (Long Term) → MSS (cambio strutturale)
+//
+// LOGICA CORRETTA:
+// - BOS deve essere ancorato ESCLUSIVAMENTE ai simboli (swing points) marcati dall'indicatore
+// - BOS rialzista: candela chiude sopra un simbolo di massimo (swing high) marcato
+// - BOS ribassista: candela chiude sotto un simbolo di minimo (swing low) marcato
+// - La linea parte dal simbolo (swing point) e termina esattamente alla candela di rottura
+// - Ignorare massimi/minimi locali che non siano swing ufficialmente marcati
+//
+// CARATTERISTICHE:
+// - Evento tattico e locale, tipicamente temporaneo
+// - Indica continuazione del trend su quel timeframe specifico (ST, IT o LT)
+// - In trend rialzista: rottura di massimo = continuazione rialzo
+// - In trend ribassista: rottura di minimo = continuazione ribasso
+// - Non implica necessariamente cambiamenti di trend a lungo termine
+//
+// UTILIZZO PRATICO:
+// - Segnale tattico per entrate/uscite a breve termine
+// - Timing di ingresso/uscita su timeframe inferiori
+// - Ottimizzazione di posizioni esistenti
+
+if ms_showBOS
+    // ═══════════════════════════════════════════════════════════════════
+    // BOS BULLISH: Rottura di simbolo di massimo (swing high)
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // BOS Bullish ST: rottura di simbolo "." (punto) swing high ST
+    // REGOLA: Qualsiasi rottura di un simbolo "." dà un BOS di breve
+    // Verifica che esista un simbolo ST marcato e che la candela chiuda sopra
+    if not na(lastSTHigh) and not na(lastSTHighTime) and not stHighBroken and close > lastSTHigh and close[1] <= lastSTHigh
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastSTHighTime, lastSTHigh, breakTime, lastSTHigh, color=ms_bosBullColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        stHighBroken := true
+    
+    // BOS Bullish IT: rottura di simbolo "△" (triangolo) swing high IT
+    // REGOLA: Qualsiasi rottura di "△" dà un BOS intermedio e conferma la struttura
+    // Verifica che esista un simbolo IT marcato e che la candela chiuda sopra
+    if not na(lastITHigh) and not na(lastITHighTime) and not itHighBroken and close > lastITHigh and close[1] <= lastITHigh
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastITHighTime, lastITHigh, breakTime, lastITHigh, color=ms_bosBullColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        itHighBroken := true
+    
+    // BOS Bullish LT: rottura di simbolo "▲" (triangolo grande) swing high LT
+    // NOTA: La rottura di "▲" può dare un MSS (vedi sezione MSS), non un BOS
+    // Questo è incluso per completezza, ma normalmente viene gestito come MSS
+    // Verifica che esista un simbolo LT marcato e che la candela chiuda sopra
+    if not na(lastLTHigh) and not na(lastLTHighTime) and not ltHighBroken and close > lastLTHigh and close[1] <= lastLTHigh
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastLTHighTime, lastLTHigh, breakTime, lastLTHigh, color=ms_bosBullColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        ltHighBroken := true
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // BOS BEARISH: Rottura di simbolo di minimo (swing low)
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // BOS Bearish ST: rottura di simbolo "." (punto) swing low ST
+    // REGOLA: Qualsiasi rottura di un simbolo "." dà un BOS di breve
+    // Verifica che esista un simbolo ST marcato e che la candela chiuda sotto
+    if not na(lastSTLow) and not na(lastSTLowTime) and not stLowBroken and close < lastSTLow and close[1] >= lastSTLow
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastSTLowTime, lastSTLow, breakTime, lastSTLow, color=ms_bosBearColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        stLowBroken := true
+    
+    // BOS Bearish IT: rottura di simbolo "▽" (triangolo) swing low IT
+    // REGOLA: Qualsiasi rottura di "▽" dà un BOS intermedio e conferma la struttura
+    // Verifica che esista un simbolo IT marcato e che la candela chiuda sotto
+    if not na(lastITLow) and not na(lastITLowTime) and not itLowBroken and close < lastITLow and close[1] >= lastITLow
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastITLowTime, lastITLow, breakTime, lastITLow, color=ms_bosBearColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        itLowBroken := true
+    
+    // BOS Bearish LT: rottura di simbolo "▼" (triangolo grande) swing low LT
+    // NOTA: La rottura di "▼" può dare un MSS (vedi sezione MSS), non un BOS
+    // Questo è incluso per completezza, ma normalmente viene gestito come MSS
+    // Verifica che esista un simbolo LT marcato e che la candela chiuda sotto
+    if not na(lastLTLow) and not na(lastLTLowTime) and not ltLowBroken and close < lastLTLow and close[1] >= lastLTLow
+        // Linea dal triangolino (swing point) alla candela di rottura, estesa a destra
+        breakTime = time  // Timestamp della candela di rottura
+        newLine = line.new(lastLTLowTime, lastLTLow, breakTime, lastLTLow, color=ms_bosBearColor, style=get_line_style_ms(ms_bosStyle), width=ms_bosWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(bosLines, newLine)
+        ltLowBroken := true
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║                    MSS DETECTION                                      ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+// MSS = Market Structure Shift: cambiamento profondo e strutturale della sequenza di massimi e minimi
+//
+// ═══════════════════════════════════════════════════════════════════════
+// REGOLA OPERATIVA - CORRISPONDENZA SIMBOLI:
+// ═══════════════════════════════════════════════════════════════════════
+// "▲/▼" (triangolo grande) = LT (Long Term)
+// REGOLA: Qualsiasi rottura di "▲/▼" può dare un MSS, cambiando la direzione strutturale su tutto il grafico
+//
+// CARATTERISTICHE:
+// - Cambio di paradigma duraturo del mercato, non solo continuazione
+// - Richiede rottura e mantenimento strutturale coerente su almeno 2 timeframe (ST → IT → LT)
+// - Indica inversione/conferma di un nuovo trend duraturo
+// - Cambio nella sequenza: da massimi/minimi decrescenti a crescenti (o viceversa)
+// - Evento strategico di medio-lungo termine
+//
+// CONDIZIONI:
+// - Progressione logica: ST → IT → LT (tutti e tre devono essere rotti in sequenza)
+// - La nuova sequenza di massimi/minimi deve essere coerente su entrambi i timeframe
+// - I segnali su breve termine (ST) confermano la nuova direzione
+//
+// UTILIZZO PRATICO:
+// - Base per posizioni strategiche di lunga durata
+// - Mantenimento di trend di medio-lungo termine
+// - Identificazione di cambi strutturali significativi
+// - Combinare con BOS di timeframe inferiori per ottimizzare timing di entrata/uscita
+
+// Flag e timestamp per tracciare la progressione ST → IT → LT per MSS
+// MSS Bullish
+var bool stHighBrokenForMSS = false
+var bool itHighBrokenForMSS = false
+var bool ltHighBrokenForMSS = false
+var int stHighBreakTimeForMSS = na
+var int itHighBreakTimeForMSS = na
+var int ltHighBreakTimeForMSS = na
+
+// MSS Bearish
+var bool stLowBrokenForMSS = false
+var bool itLowBrokenForMSS = false
+var bool ltLowBrokenForMSS = false
+var int stLowBreakTimeForMSS = na
+var int itLowBreakTimeForMSS = na
+var int ltLowBreakTimeForMSS = na
+
+if ms_showMSS
+    // ═══════════════════════════════════════════════════════════════════
+    // MSS BULLISH: Progressione ST → IT → LT
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // STEP 1: Rottura ST (breve termine) - inizio della progressione
+    if not na(lastSTHigh) and not na(lastSTHighTime) and close > lastSTHigh and close[1] <= lastSTHigh
+        stHighBrokenForMSS := true
+        stHighBreakTimeForMSS := time  // Salva timestamp candela di rottura ST
+    
+    // STEP 2: Rottura IT (intermedio) - conferma
+    if not na(lastITHigh) and not na(lastITHighTime) and close > lastITHigh and close[1] <= lastITHigh
+        itHighBrokenForMSS := true
+        itHighBreakTimeForMSS := time  // Salva timestamp candela di rottura IT
+    
+    // STEP 3: Rottura LT (lungo termine) - cambio strutturale finale
+    if not na(lastLTHigh) and not na(lastLTHighTime) and close > lastLTHigh and close[1] <= lastLTHigh
+        ltHighBrokenForMSS := true
+        ltHighBreakTimeForMSS := time  // Salva timestamp candela di rottura LT
+    
+    // MSS CONFERMATO: IT e LT devono essere rotti (progressione logica)
+    // Disegna MSS quando LT viene rotto, se IT è già stato rotto
+    if itHighBrokenForMSS and ltHighBrokenForMSS and not ltHighBroken and not na(ltHighBreakTimeForMSS)
+        // Linea dal punto swing LT al timestamp esatto della candela di rottura LT, estesa a destra
+        newLine = line.new(lastLTHighTime, lastLTHigh, ltHighBreakTimeForMSS, lastLTHigh, color=ms_mssBullColor, style=get_line_style_ms(ms_mssStyle), width=ms_mssWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(mssLines, newLine)
+        // Label sulla candela di break per didattica visiva
+        newLabel = label.new(ltHighBreakTimeForMSS, lastLTHigh, "MSS", color=color.new(ms_mssBullColor, 80), textcolor=ms_mssBullColor, style=label.style_label_down, size=size.small, xloc=xloc.bar_time)
+        array.push(mssLabels, newLabel)
+        ltHighBroken := true
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // MSS BEARISH: Progressione ST → IT → LT
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // STEP 1: Rottura ST (breve termine) - inizio della progressione
+    if not na(lastSTLow) and not na(lastSTLowTime) and close < lastSTLow and close[1] >= lastSTLow
+        stLowBrokenForMSS := true
+        stLowBreakTimeForMSS := time  // Salva timestamp candela di rottura ST
+    
+    // STEP 2: Rottura IT (intermedio) - conferma
+    if not na(lastITLow) and not na(lastITLowTime) and close < lastITLow and close[1] >= lastITLow
+        itLowBrokenForMSS := true
+        itLowBreakTimeForMSS := time  // Salva timestamp candela di rottura IT
+    
+    // STEP 3: Rottura LT (lungo termine) - cambio strutturale finale
+    if not na(lastLTLow) and not na(lastLTLowTime) and close < lastLTLow and close[1] >= lastLTLow
+        ltLowBrokenForMSS := true
+        ltLowBreakTimeForMSS := time  // Salva timestamp candela di rottura LT
+    
+    // MSS CONFERMATO: IT e LT devono essere rotti (progressione logica)
+    // Disegna MSS quando LT viene rotto, se IT è già stato rotto
+    if itLowBrokenForMSS and ltLowBrokenForMSS and not ltLowBroken and not na(ltLowBreakTimeForMSS)
+        // Linea dal punto swing LT al timestamp esatto della candela di rottura LT, estesa a destra
+        newLine = line.new(lastLTLowTime, lastLTLow, ltLowBreakTimeForMSS, lastLTLow, color=ms_mssBearColor, style=get_line_style_ms(ms_mssStyle), width=ms_mssWidth, xloc=xloc.bar_time, extend=extend.right)
+        array.push(mssLines, newLine)
+        // Label sulla candela di break per didattica visiva
+        newLabel = label.new(ltLowBreakTimeForMSS, lastLTLow, "MSS", color=color.new(ms_mssBearColor, 80), textcolor=ms_mssBearColor, style=label.style_label_up, size=size.small, xloc=xloc.bar_time)
+        array.push(mssLabels, newLabel)
+        ltLowBroken := true
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // RESET: Quando viene creato un nuovo swing, resetta la progressione
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // Reset MSS Bullish quando viene creato un nuovo swing ST
+    if array.size(stHigh) > 0
+        lastSTLabel = array.get(stHigh, array.size(stHigh) - 1)
+        if not na(lastSTLabel)
+            currentSTHigh = label.get_y(lastSTLabel)
+            if currentSTHigh != lastSTHigh
+                stHighBrokenForMSS := false
+                stHighBreakTimeForMSS := na
+                // Reset anche IT e LT se la sequenza si interrompe
+                itHighBrokenForMSS := false
+                itHighBreakTimeForMSS := na
+                ltHighBrokenForMSS := false
+                ltHighBreakTimeForMSS := na
+    
+    // Reset MSS Bullish quando viene creato un nuovo swing IT
+    if array.size(itHigh) > 0
+        lastITLabel = array.get(itHigh, array.size(itHigh) - 1)
+        if not na(lastITLabel)
+            currentITHigh = label.get_y(lastITLabel)
+            if currentITHigh != lastITHigh
+                itHighBrokenForMSS := false
+                itHighBreakTimeForMSS := na
+                // Reset anche LT se la sequenza si interrompe
+                ltHighBrokenForMSS := false
+                ltHighBreakTimeForMSS := na
+    
+    // Reset MSS Bullish quando viene creato un nuovo swing LT
+    if array.size(ltHigh) > 0
+        lastLTLabel = array.get(ltHigh, array.size(ltHigh) - 1)
+        if not na(lastLTLabel)
+            currentLTHigh = label.get_y(lastLTLabel)
+            if currentLTHigh != lastLTHigh
+                ltHighBrokenForMSS := false
+                ltHighBreakTimeForMSS := na
+    
+    // Reset MSS Bearish quando viene creato un nuovo swing ST
+    if array.size(stLow) > 0
+        lastSTLabel = array.get(stLow, array.size(stLow) - 1)
+        if not na(lastSTLabel)
+            currentSTLow = label.get_y(lastSTLabel)
+            if currentSTLow != lastSTLow
+                stLowBrokenForMSS := false
+                stLowBreakTimeForMSS := na
+                // Reset anche IT e LT se la sequenza si interrompe
+                itLowBrokenForMSS := false
+                itLowBreakTimeForMSS := na
+                ltLowBrokenForMSS := false
+                ltLowBreakTimeForMSS := na
+    
+    // Reset MSS Bearish quando viene creato un nuovo swing IT
+    if array.size(itLow) > 0
+        lastITLabel = array.get(itLow, array.size(itLow) - 1)
+        if not na(lastITLabel)
+            currentITLow = label.get_y(lastITLabel)
+            if currentITLow != lastITLow
+                itLowBrokenForMSS := false
+                itLowBreakTimeForMSS := na
+                // Reset anche LT se la sequenza si interrompe
+                ltLowBrokenForMSS := false
+                ltLowBreakTimeForMSS := na
+    
+    // Reset MSS Bearish quando viene creato un nuovo swing LT
+    if array.size(ltLow) > 0
+        lastLTLabel = array.get(ltLow, array.size(ltLow) - 1)
+        if not na(lastLTLabel)
+            currentLTLow = label.get_y(lastLTLabel)
+            if currentLTLow != lastLTLow
+                ltLowBrokenForMSS := false
+                ltLowBreakTimeForMSS := na

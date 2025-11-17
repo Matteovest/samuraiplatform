@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Vini Bianchi - Enoteca L'Angolo del Vino. Selezione di vini bianchi di qualità del territorio laziale e di altre regioni italiane.">
+    <title>Vini Bianchi - L'Angolo del Vino</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>L'Angolo del Vino</h1>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                <li><a href="prodotti.html">Prodotti</a></li>
+                <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                <li><a href="bollicine.html">Bollicine</a></li>
+                <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+            <div class="cart-icon-container">
+                <a href="carrello.html" class="cart-icon" id="cartIcon">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Vini Bianchi -->
+    <section class="section" style="padding-top: 8rem;">
+        <div class="container">
+            <h2 class="section-title">Vini Bianchi</h2>
+            <p class="intro-text">Esplora la nostra selezione di vini bianchi del territorio laziale e di altre regioni italiane. Dalle etichette più prestigiose ai piccoli produttori locali, ogni bottiglia racconta una storia di passione, tradizione e maestria artigianale.</p>
+
+            <!-- Prodotti Bianchi -->
+            <div class="products-grid" style="margin-top: 3rem;">
+                <!-- Aimè Pecorino Superiore Biologico -->
+                <div class="product-card" data-category="bianchi">
+                    <div class="product-badge">Bianco Biologico</div>
+                    <div class="product-image">
+                        <img src="images/aime-pecorino.jpg.jpg" alt="Aimè Pecorino Superiore Biologico" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Aimè</h3>
+                        <div class="product-info">
+                            <span class="cantina">Cascina del Colle</span>
+                        </div>
+                        <p class="tipologia">Pecorino Superiore Biologico</p>
+                        <div class="price">€19,00</div>
+                        <p class="degustazione">Vino bianco biologico prodotto con uve Pecorino, un vitigno autoctono dell'Abruzzo. La produzione biologica garantisce massimo rispetto dell'ambiente e della natura. Al naso presenta profumi intensi di frutta bianca e note floreali, al palato è fresco e minerale con una piacevole sapidità.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Pesce fresco, crostacei, formaggi freschi, primi piatti delicati
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-aimè-bianchi">Info & Contatta</button>
+                                <div id="contact-aimè-bianchi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-aimè-bianchi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-aimè-bianchi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Aimè" data-product-price="19.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bianco di Grignanello -->
+                <div class="product-card" data-category="bianchi">
+                    <div class="product-badge">Bianco</div>
+                    <div class="product-image">
+                        <img src="images/bianco-grignanello.jpg.jpg" alt="Bianco di Grignanello" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Bianco di Grignanello</h3>
+                        <div class="product-info">
+                            <span class="cantina">Azienda Grignanello</span>
+                            <span class="annata">Castellina in Chianti</span>
+                        </div>
+                        <p class="tipologia">Bianco - Chianti</p>
+                        <div class="price">€22,00</div>
+                        <p class="degustazione">Elegante vino bianco prodotto nel cuore del Chianti, a Castellina. Esprime appieno il carattere del territorio toscano con note di frutta bianca matura, sentori floreali e una fine mineralità. Al palato è strutturato ed equilibrato, con una buona persistenza.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Pesce alla griglia, primi piatti elaborati, pollame, formaggi semi-stagionati
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-bianco-grignanello-bianchi">Info & Contatta</button>
+                                <div id="contact-bianco-grignanello-bianchi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-bianco-grignanello-bianchi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-bianco-grignanello-bianchi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Bianco di Grignanello" data-product-price="22.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Le Lase Pinot Grigio Satres -->
+                <div class="product-card" data-category="bianchi">
+                    <div class="product-badge">Bianco</div>
+                    <div class="product-image">
+                        <img src="images/le-lase-pinot-grigio.jpg.jpg" alt="Le Lase Pinot Grigio Satres" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Pinot Grigio Satres</h3>
+                        <div class="product-info">
+                            <span class="cantina">Le Lase</span>
+                            <span class="annata">Orte</span>
+                        </div>
+                        <p class="tipologia">Pinot Grigio</p>
+                        <div class="price">€18,00</div>
+                        <p class="degustazione">Pinot Grigio di eccellenza prodotto dalla cantina Le Lase di Orte, nella Tuscia. Il nome "Satres" richiama la tradizione locale. Al naso si presenta con profumi freschi di frutta bianca e agrumi, al palato è vivace e sapido, perfetto equilibrio tra freschezza e struttura.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Pesce crudo, antipasti di mare, risotti, pasta con pesce, formaggi freschi
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-pinot-grigio-bianchi">Info & Contatta</button>
+                                <div id="contact-pinot-grigio-bianchi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-pinot-bianchi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-pinot-bianchi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Pinot Grigio Satres" data-product-price="18.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donna Walda Ciucci -->
+                <div class="product-card" data-category="bianchi">
+                    <div class="product-badge">Bianco Biologico</div>
+                    <div class="product-image">
+                        <img src="images/donna-walda.jpg.jpg" alt="Donna Walda Ciucci Biologico" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Donna Walda</h3>
+                        <div class="product-info">
+                            <span class="cantina">Ciucci</span>
+                        </div>
+                        <p class="tipologia">Bianco Biologico</p>
+                        <div class="price">€12,00</div>
+                        <p class="degustazione">Vino bianco biologico della cantina Ciucci, caratterizzato da freschezza e beva facile. Prodotto con metodi rispettosi dell'ambiente, esprime note di frutta fresca e agrumi. Al palato è leggero e piacevole, perfetto per il consumo quotidiano o per aperitivi.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Aperitivi, antipasti leggeri, pesce fresco, piatti vegetariani
+                        </div>
+                        <div class="occasione">
+                            <strong>Occasione:</strong> Tutti i giorni, aperitivi, pranzi informali
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-donna-walda-bianchi">Info & Contatta</button>
+                                <div id="contact-donna-walda-bianchi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-donna-bianchi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-donna-bianchi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Donna Walda" data-product-price="12.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>L'Angolo del Vino</h3>
+                    <p>La passione per il vino del territorio laziale è il nostro pane quotidiano. Ogni bottiglia e ogni litro di vino sfuso che selezioniamo racconta una storia, ogni produttore locale con cui collaboriamo condivide la nostra visione: valorizzare l'autenticità, la qualità e la tradizione del Viterbese.</p>
+                    <p style="margin-top: 10px;"><strong>Vini sfusi da:</strong> Le Lase (Orte), Stefanoni (Montefiascone), Castelli (Marta) e Cantina Simoncini (Cellere).</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Iscriviti per ricevere:</p>
+                    <ul>
+                        <li>Le ultime novità in negozio</li>
+                        <li>Offerte speciali riservate agli iscritti</li>
+                        <li>Consigli stagionali e abbinamenti</li>
+                        <li>Informazioni su nuovi arrivi</li>
+                    </ul>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="La tua email" required>
+                        <button type="submit" class="btn btn-primary">Iscriviti</button>
+                    </form>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Link Rapidi</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                        <li><a href="prodotti.html">Prodotti</a></li>
+                        <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                        <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                        <li><a href="bollicine.html">Bollicine</a></li>
+                        <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                        <li><a href="contatti.html">Contatti</a></li>
+                        <li><a href="carrello.html">Carrello</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Seguici</h4>
+                    <p>Seguici su [Facebook/Instagram] per restare sempre aggiornato sulle nostre attività, scoperte del territorio e novità enologiche.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 L'Angolo del Vino - Via del Santuario, 8 - La Quercia, Viterbo. Tutti i diritti riservati.</p>
+                <p style="margin-top: 10px;">Tel: <a href="tel:+393402143560" style="color: rgba(255,255,255,0.8);">340 214 3560</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

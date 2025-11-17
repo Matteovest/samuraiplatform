@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Bollicine e Spumanti - Enoteca L'Angolo del Vino. Spumanti metodo classico e bollicine di qualità per ogni occasione speciale.">
+    <title>Bollicine - L'Angolo del Vino</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>L'Angolo del Vino</h1>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                <li><a href="prodotti.html">Prodotti</a></li>
+                <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                <li><a href="bollicine.html">Bollicine</a></li>
+                <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+            <div class="cart-icon-container">
+                <a href="carrello.html" class="cart-icon" id="cartIcon">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Bollicine -->
+    <section class="section" style="padding-top: 8rem;">
+        <div class="container">
+            <h2 class="section-title">Bollicine & Spumanti</h2>
+            <p class="intro-text">Ogni momento speciale merita di essere celebrato con bollicine di qualità. La nostra selezione di spumanti e prosecco porta la magia delle feste direttamente sulla tua tavola.</p>
+
+            <!-- Prodotti Bollicine -->
+            <div class="products-grid" style="margin-top: 3rem;">
+                <!-- Le Lase Prima Lux -->
+                <div class="product-card" data-category="rosati">
+                    <div class="product-badge">Metodo Classico</div>
+                    <div class="product-image">
+                        <img src="images/le-lase-prima-lux.jpg.jpg" alt="Le Lase Prima Lux" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Prima Lux</h3>
+                        <div class="product-info">
+                            <span class="cantina">Le Lase</span>
+                            <span class="annata">Orte</span>
+                        </div>
+                        <p class="tipologia">Spumante Metodo Classico</p>
+                        <div class="price">€30,00</div>
+                        <p class="degustazione">Spumante di alta qualità prodotto con metodo classico dalla cantina Le Lase di Orte. Perlage fine e persistente, eleganza e complessità che rendono questo spumante perfetto per le occasioni speciali.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Aperitivi eleganti, antipasti, pesce crudo, occasioni speciali
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-prima-lux-bollicine">Info & Contatta</button>
+                                <div id="contact-prima-lux-bollicine" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-prima-bollicine" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-prima-bollicine)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Prima Lux" data-product-price="30.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metodo Classico Leonardi -->
+                <div class="product-card" data-category="rosati">
+                    <div class="product-badge">Metodo Classico</div>
+                    <div class="product-image">
+                        <img src="images/leonardi-metodo-classico.jpg.jpg" alt="Metodo Classico Leonardi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Metodo Classico</h3>
+                        <div class="product-info">
+                            <span class="cantina">Leonardi</span>
+                        </div>
+                        <p class="tipologia">Spumante Metodo Classico</p>
+                        <div class="price">€20,00</div>
+                        <p class="degustazione">Spumante prodotto con metodo classico, seguendo le tradizioni più antiche. Bollicine finissime e perlage elegante, perfetto per celebrare ogni momento speciale con stile e raffinatezza.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Aperitivi, antipasti, brindisi, occasioni conviviali
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-metodo-bollicine">Info & Contatta</button>
+                                <div id="contact-metodo-bollicine" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-metodo-bollicine" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-metodo-bollicine)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Metodo Classico Leonardi" data-product-price="20.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metodo Classico Rose Leonardi -->
+                <div class="product-card" data-category="rosati">
+                    <div class="product-badge">Metodo Classico Rosé</div>
+                    <div class="product-image">
+                        <img src="images/leonardi-rose.jpg" alt="Metodo Classico Rose Leonardi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Metodo Classico Rosé</h3>
+                        <div class="product-info">
+                            <span class="cantina">Leonardi</span>
+                        </div>
+                        <p class="tipologia">Spumante Rosé Metodo Classico</p>
+                        <div class="price">€20,00</div>
+                        <p class="degustazione">Elegante spumante rosé prodotto con metodo classico. Colore rosa delicato, perlage fine e persistente. Freschezza e eleganza si uniscono per creare un'esperienza sensoriale raffinata.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Aperitivi, antipasti leggeri, pesce, brunch, occasioni romantiche
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-rose-bollicine">Info & Contatta</button>
+                                <div id="contact-rose-bollicine" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-rose-bollicine" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-rose-bollicine)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Metodo Classico Rosé Leonardi" data-product-price="20.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Perlage Zharpi Extra Dry -->
+                <div class="product-card" data-category="rosati">
+                    <div class="product-badge">Extra Dry</div>
+                    <div class="product-image">
+                        <img src="images/perlage-zharpi.jpg.jpg" alt="Perlage Zharpi Extra Dry" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Perlage Zharpi</h3>
+                        <div class="product-info">
+                            <span class="cantina">Zharpi</span>
+                        </div>
+                        <p class="tipologia">Spumante Extra Dry</p>
+                        <div class="price">€9,90</div>
+                        <p class="degustazione">Spumante extra dry dal rapporto qualità-prezzo eccellente. Perlage vivace e fresco, perfetto per ogni momento di festa. Ideale per chi cerca bollicine di qualità a un prezzo accessibile.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Aperitivi, antipasti, momenti conviviali, tutti i giorni
+                        </div>
+                        <div class="occasione">
+                            <strong>Occasione:</strong> Tutti i giorni, aperitivi, festeggiamenti informali
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-perlage-bollicine">Info & Contatta</button>
+                                <div id="contact-perlage-bollicine" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-perlage-bollicine" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-perlage-bollicine)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Perlage Zharpi" data-product-price="9.90">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #8B0000 0%, #5C0000 100%); color: white; padding: 3rem; border-radius: 15px; margin-top: 3rem; text-align: center;">
+                <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Celebra con Stile</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Ogni momento speciale merita il brindisi perfetto. Le nostre bollicine sono selezionate per portare eleganza e gioia sulla tua tavola.</p>
+                <p style="margin-bottom: 1.5rem;"><strong>Per ogni esigenza, dal budget più contenuto alle etichette più prestigiose, abbiamo la bollicina giusta per te.</strong></p>
+                <p>Vieni in negozio per scoprire la nostra selezione completa e lasciati guidare nella scelta perfetta per la tua occasione speciale!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>L'Angolo del Vino</h3>
+                    <p>La passione per il vino del territorio laziale è il nostro pane quotidiano. Ogni bottiglia e ogni litro di vino sfuso che selezioniamo racconta una storia, ogni produttore locale con cui collaboriamo condivide la nostra visione: valorizzare l'autenticità, la qualità e la tradizione del Viterbese.</p>
+                    <p style="margin-top: 10px;"><strong>Vini sfusi da:</strong> Le Lase (Orte), Stefanoni (Montefiascone), Castelli (Marta) e Cantina Simoncini (Cellere).</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Iscriviti per ricevere:</p>
+                    <ul>
+                        <li>Le ultime novità in negozio</li>
+                        <li>Offerte speciali riservate agli iscritti</li>
+                        <li>Consigli stagionali e abbinamenti</li>
+                        <li>Informazioni su nuovi arrivi</li>
+                    </ul>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="La tua email" required>
+                        <button type="submit" class="btn btn-primary">Iscriviti</button>
+                    </form>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Link Rapidi</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                        <li><a href="prodotti.html">Prodotti</a></li>
+                        <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                        <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                        <li><a href="bollicine.html">Bollicine</a></li>
+                        <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                        <li><a href="contatti.html">Contatti</a></li>
+                        <li><a href="carrello.html">Carrello</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Seguici</h4>
+                    <p>Seguici su [Facebook/Instagram] per restare sempre aggiornato sulle nostre attività, scoperte del territorio e novità enologiche.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 L'Angolo del Vino - Via del Santuario, 8 - La Quercia, Viterbo. Tutti i diritti riservati.</p>
+                <p style="margin-top: 10px;">Tel: <a href="tel:+393402143560" style="color: rgba(255,255,255,0.8);">340 214 3560</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

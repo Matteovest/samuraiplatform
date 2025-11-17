@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Vini Rossi - Enoteca L'Angolo del Vino. Selezione di vini rossi di qualità del territorio laziale e di altre regioni italiane.">
+    <title>Vini Rossi - L'Angolo del Vino</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>L'Angolo del Vino</h1>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                <li><a href="prodotti.html">Prodotti</a></li>
+                <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                <li><a href="bollicine.html">Bollicine</a></li>
+                <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+            <div class="cart-icon-container">
+                <a href="carrello.html" class="cart-icon" id="cartIcon">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Vini Rossi -->
+    <section class="section" style="padding-top: 8rem;">
+        <div class="container">
+            <h2 class="section-title">Vini Rossi</h2>
+            <p class="intro-text">Esplora la nostra selezione di vini rossi del territorio laziale e di altre regioni italiane. Dalle etichette più prestigiose ai piccoli produttori locali, ogni bottiglia racconta una storia di passione, tradizione e maestria artigianale.</p>
+
+            <!-- Prodotti Rossi -->
+            <div class="products-grid" style="margin-top: 3rem;">
+                <!-- Violone DOP Tuscia Le Lase -->
+                <div class="product-card" data-category="rossi">
+                    <div class="product-badge">Rosso DOP</div>
+                    <div class="product-image">
+                        <img src="images/violone-le-lase.jpg.jpg" alt="Violone DOP Tuscia Le Lase" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Violone DOP Tuscia</h3>
+                        <div class="product-info">
+                            <span class="cantina">Le Lase</span>
+                            <span class="annata">Orte</span>
+                        </div>
+                        <p class="tipologia">DOP Tuscia - Rosso</p>
+                        <div class="price">€20,00</div>
+                        <p class="degustazione">Vino rosso prodotto al 100% con uve Violone, vitigno autoctono della Tuscia. Affinato in barrique per 8 mesi e almeno 6 mesi in bottiglia. Colore rosso rubino intenso con riflessi violacei. Al naso emergono note di frutta rossa matura, spezie e sentori eleganti di legno. Al palato è strutturato, con tannini maturi e una persistenza notevole.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Primi piatti saporiti, carni alla griglia, selvaggina, formaggi stagionati
+                        </div>
+                        <div class="occasione">
+                            <strong>Occasione:</strong> Cene importanti, occasioni speciali
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-violone-rossi">Info & Contatta</button>
+                                <div id="contact-violone-rossi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-violone-rossi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-violone-rossi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Violone DOP Tuscia" data-product-price="20.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Negus Cascina del Colle -->
+                <div class="product-card featured" data-category="rossi">
+                    <div class="product-badge">Rosso DOC</div>
+                    <div class="product-image">
+                        <img src="images/negus-cascina-del-colle.jpg.jpg" alt="Negus Cascina del Colle" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Negus</h3>
+                        <div class="product-info">
+                            <span class="cantina">Cascina del Colle</span>
+                        </div>
+                        <p class="tipologia">Montepulciano d'Abruzzo DOC</p>
+                        <div class="price">€42,00</div>
+                        <p class="degustazione">Montepulciano d'Abruzzo DOC di grande struttura. Dopo una lunga macerazione e affinamento di 18-24 mesi in barrique, raggiunge massima complessità. Colore rosso rubino intenso con riflessi granati. Al naso offre aromi complessi di frutti rossi, spezie dolci come cannella e liquirizia, con lievi sentori di vaniglia. Al palato è corposo, con grande consistenza e finale persistente.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Piatti saporiti con selvaggina, primi piatti con sugo di cinghiale, carni rosse grigliate, formaggi molto stagionati
+                        </div>
+                        <div class="occasione">
+                            <strong>Occasione:</strong> Occasioni speciali, cene importanti, regali prestigiosi
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-negus-rossi">Info & Contatta</button>
+                                <div id="contact-negus-rossi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-negus-rossi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-negus-rossi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Negus" data-product-price="42.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amarone Tommasi -->
+                <div class="product-card featured" data-category="rossi meditazione">
+                    <div class="product-badge">Rosso DOCG</div>
+                    <div class="product-image">
+                        <img src="images/amarone-tommasi.jpg.jpg" alt="Amarone Tommasi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImmagine%3C/text%3E%3C/svg%3E'; this.style.display='none';">
+                    </div>
+                    <div class="product-content">
+                        <h3>Amarone della Valpolicella</h3>
+                        <div class="product-info">
+                            <span class="cantina">Tommasi</span>
+                            <span class="annata">Valpolicella Classico</span>
+                        </div>
+                        <p class="tipologia">Amarone DOCG</p>
+                        <div class="price">€44,00</div>
+                        <p class="degustazione">Amarone della Valpolicella Classico DOCG di Tommasi, uno dei vini più iconici d'Italia. Prodotto con uve Corvina, Rondinella e Corvinone, dopo un appassimento delle uve e affinamento in botti di rovere. Colore rosso rubino profondo. Al naso offre un bouquet complesso di frutta rossa matura, spezie e note di cioccolato. Al palato è pieno, con tannini morbidi e finale lungo e persistente.</p>
+                        <div class="abbinamenti">
+                            <strong>Abbinamenti:</strong> Carne rossa, selvaggina, formaggi stagionati, brasati, piatti della cucina tradizionale italiana
+                        </div>
+                        <div class="occasione">
+                            <strong>Occasione:</strong> Occasioni speciali, regali prestigiosi, cene importanti, vino da meditazione
+                        </div>
+                        <div class="product-buttons">
+                            <div class="contact-dropdown">
+                                <button class="btn btn-product btn-info" data-dropdown="contact-amarone-rossi">Info & Contatta</button>
+                                <div id="contact-amarone-rossi" class="contact-dropdown-menu">
+                                    <a href="tel:+393402143560" class="contact-dropdown-item">
+                                        <svg class="icon-phone" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                        <span>Chiama</span>
+                                    </a>
+                                    <a href="https://www.instagram.com/la_cantina_di_paola?igsh=bnQ3bW92bGxoN3Jh" target="_blank" rel="noopener noreferrer" class="contact-dropdown-item">
+                                        <svg class="icon-instagram" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <defs>
+                                                <linearGradient id="instagram-gradient-amarone-rossi" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#833AB4;stop-opacity:1" />
+                                                    <stop offset="50%" style="stop-color:#E1306C;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#FCAF45;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-amarone-rossi)"/>
+                                            <circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/>
+                                            <circle cx="17.5" cy="6.5" r="1" fill="white"/>
+                                        </svg>
+                                        <span>Instagram</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn btn-product btn-cart" data-product-name="Amarone della Valpolicella" data-product-price="44.00">🛒 Aggiungi al Carrello</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>L'Angolo del Vino</h3>
+                    <p>La passione per il vino del territorio laziale è il nostro pane quotidiano. Ogni bottiglia e ogni litro di vino sfuso che selezioniamo racconta una storia, ogni produttore locale con cui collaboriamo condivide la nostra visione: valorizzare l'autenticità, la qualità e la tradizione del Viterbese.</p>
+                    <p style="margin-top: 10px;"><strong>Vini sfusi da:</strong> Le Lase (Orte), Stefanoni (Montefiascone), Castelli (Marta) e Cantina Simoncini (Cellere).</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Iscriviti per ricevere:</p>
+                    <ul>
+                        <li>Le ultime novità in negozio</li>
+                        <li>Offerte speciali riservate agli iscritti</li>
+                        <li>Consigli stagionali e abbinamenti</li>
+                        <li>Informazioni su nuovi arrivi</li>
+                    </ul>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="La tua email" required>
+                        <button type="submit" class="btn btn-primary">Iscriviti</button>
+                    </form>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Link Rapidi</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                        <li><a href="prodotti.html">Prodotti</a></li>
+                        <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                        <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                        <li><a href="bollicine.html">Bollicine</a></li>
+                        <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                        <li><a href="contatti.html">Contatti</a></li>
+                        <li><a href="carrello.html">Carrello</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Seguici</h4>
+                    <p>Seguici su [Facebook/Instagram] per restare sempre aggiornato sulle nostre attività, scoperte del territorio e novità enologiche.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 L'Angolo del Vino - Via del Santuario, 8 - La Quercia, Viterbo. Tutti i diritti riservati.</p>
+                <p style="margin-top: 10px;">Tel: <a href="tel:+393402143560" style="color: rgba(255,255,255,0.8);">340 214 3560</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

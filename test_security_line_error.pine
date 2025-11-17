@@ -1,0 +1,38 @@
+//@version=6
+// TEST MINI: Errore line.new con security()
+// Questo script dimostra l'errore e la soluzione
+
+indicator("Test Security + Line.new Error", overlay=true)
+
+// ═══════════════════════════════════════════════════════════════════════
+// ERRORE: Non possiamo usare valori da security() direttamente in line.new()
+// ═══════════════════════════════════════════════════════════════════════
+
+// ERRATO: Questo causerà errore "line.new cannot be used with security()"
+// daily_high_err = request.security(syminfo.tickerid, "D", high[1], lookahead=barmerge.lookahead_on)
+// line.new(bar_index, daily_high_err, bar_index + 10, daily_high_err, color=color.red)
+// ↑ Questo NON funziona!
+
+// ═══════════════════════════════════════════════════════════════════════
+// SOLUZIONE: Memorizzare in var aggiornata solo su barstate.isconfirmed
+// ═══════════════════════════════════════════════════════════════════════
+
+// Step 1: Carica dati HTF con security() (solo per logica)
+daily_high_raw = request.security(syminfo.tickerid, "D", high[1], lookahead=barmerge.lookahead_on)
+
+// Step 2: Variabile persistente per memorizzare il valore
+var float daily_high_mem = na
+
+// Step 3: Aggiorna SOLO quando la barra è confermata (chiusa)
+if barstate.isconfirmed
+    daily_high_mem := daily_high_raw
+
+// Step 4: Disegna usando SOLO la variabile memorizzata (non daily_high_raw)
+if not na(daily_high_mem)
+    line.new(bar_index, daily_high_mem, bar_index + 10, daily_high_mem, color=color.red, width=2)
+
+// ═══════════════════════════════════════════════════════════════════════
+// PATTERN CORRETTO:
+// security() → variabile temporanea → var memorizzata su barstate.isconfirmed → line.new()
+// ═══════════════════════════════════════════════════════════════════════
+

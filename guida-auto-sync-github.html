@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sincronizzazione Automatica con GitHub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #24292e 0%, #586069 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #24292e;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 10px;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #24292e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 8px;
+        }
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .step-box {
+            background: #f8f9fa;
+            border-left: 5px solid #28a745;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 5px;
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #f8d7da;
+            padding: 15px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-left: 4px solid #0d6efd;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #ddd;
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        ul, ol {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        li {
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Sincronizzazione Automatica con GitHub</h1>
+        <p style="font-size: 1.1rem; color: #666; margin-bottom: 30px;">
+            Sistema automatico per sincronizzare il codice da Cursor a GitHub - Ogni salvataggio viene automaticamente committato e pushato!
+        </p>
+
+        <div class="info">
+            <strong>💡 Come Funziona:</strong><br>
+            Quando salvi un file in Cursor, il sistema rileva la modifica, aspetta qualche secondo 
+            (per raggruppare modifiche multiple), esegue automaticamente <code>git add</code>, <code>git commit</code> 
+            e <code>git push</code> su GitHub. Tutto automatico, zero intervento manuale!
+        </div>
+
+        <h2>⚡ Quick Start (3 Passi)</h2>
+
+        <div class="step-box">
+            <div class="step-number">1</div>
+            <h3>Installa Git</h3>
+            <p>Se Git non è installato:</p>
+            <ul>
+                <li>Scarica da: <a href="https://git-scm.com/download/win" target="_blank">https://git-scm.com/download/win</a></li>
+                <li>Installa Git for Windows</li>
+                <li>Riavvia Cursor/terminal dopo l'installazione</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Oppure via terminale:</strong></p>
+            <code>winget install --id Git.Git -e --source winget</code>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">2</div>
+            <h3>Esegui lo Script di Setup</h3>
+            <p>Apri PowerShell nella cartella del progetto:</p>
+            <code>cd C:\Users\Matteo\.cursor<br>.\setup-auto-sync-github.ps1</code>
+            <p style="margin-top: 15px;">Segui le istruzioni a schermo (inserisci nome e email per Git).</p>
+            <p>Lo script creerà automaticamente:</p>
+            <ul>
+                <li>Repository Git (se non esiste)</li>
+                <li>File <code>auto-commit.ps1</code> (script per commit automatico)</li>
+                <li>File <code>file-watcher.ps1</code> (script per monitoraggio file)</li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">3</div>
+            <h3>Collega il Repository GitHub</h3>
+            <p>Se non hai ancora collegato il repository:</p>
+            <code>git remote add origin https://github.com/TUOUSERNANE/NOME-REPO.git</code>
+            <p style="margin-top: 15px;"><strong>Sostituisci:</strong></p>
+            <ul>
+                <li><code>TUOUSERNANE</code> con il tuo username GitHub</li>
+                <li><code>NOME-REPO</code> con il nome del repository</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Esempio:</strong></p>
+            <code>git remote add origin https://github.com/matteo/enoteca-angolo-del-vino.git</code>
+        </div>
+
+        <h2>▶️ Avvia la Sincronizzazione</h2>
+
+        <div class="step-box">
+            <h3>Opzione A: File Watcher (Consigliato - Monitoraggio Continuo)</h3>
+            <p>Avvia il file watcher che monitora i file 24/7:</p>
+            <code>.\file-watcher.ps1</code>
+            
+            <div class="success" style="margin-top: 20px;">
+                <strong>✅ Cosa fa:</strong>
+                <ul>
+                    <li>Rimane in esecuzione e monitora tutti i file</li>
+                    <li>Quando salvi un file in Cursor, lo rileva automaticamente</li>
+                    <li>Aspetta 5 secondi (per raggruppare modifiche multiple)</li>
+                    <li>Esegue automaticamente commit e push su GitHub</li>
+                    <li>Mostra messaggi quando rileva modifiche</li>
+                </ul>
+            </div>
+            
+            <p style="margin-top: 20px;"><strong>Per fermare:</strong> Premi <code>CTRL+C</code> nel terminale</p>
+            
+            <p style="margin-top: 20px;"><strong>Per eseguire in background:</strong></p>
+            <code>Start-Process powershell -ArgumentList "-NoExit", "-File", ".\file-watcher.ps1"</code>
+        </div>
+
+        <div class="step-box">
+            <h3>Opzione B: Commit Manuale On-Demand</h3>
+            <p>Se preferisci controllare quando fare commit:</p>
+            <code>.\auto-commit.ps1</code>
+            
+            <p style="margin-top: 15px;"><strong>Con messaggio personalizzato:</strong></p>
+            <code>.\auto-commit.ps1 -CommitMessage "Aggiornamento prodotti e prezzi"</code>
+        </div>
+
+        <h2>🎯 Workflow Consigliato</h2>
+
+        <div class="info">
+            <h3>Per Uso Giornaliero:</h3>
+            <ol>
+                <li><strong>Al mattino:</strong> Avvia <code>.\file-watcher.ps1</code></li>
+                <li><strong>Durante la giornata:</strong> Lavora normalmente in Cursor - ogni salvataggio viene automaticamente sincronizzato!</li>
+                <li><strong>Alla sera:</strong> Puoi fermare il file watcher (CTRL+C) o lasciarlo in esecuzione</li>
+            </ol>
+        </div>
+
+        <h2>⚙️ Personalizzazione</h2>
+
+        <div class="step-box">
+            <h3>Modificare il Tempo di Attesa (Throttle)</h3>
+            <p>Nel file <code>file-watcher.ps1</code>, modifica:</p>
+            <code>param(<br>&nbsp;&nbsp;&nbsp;&nbsp;[int]$ThrottleSeconds = 5&nbsp;&nbsp;# Cambia questo valore<br>)</code>
+            
+            <ul style="margin-top: 15px;">
+                <li><strong>Valore più basso</strong> (es. 2 secondi): commit più frequenti</li>
+                <li><strong>Valore più alto</strong> (es. 30 secondi): raggruppa più modifiche insieme</li>
+            </ul>
+        </div>
+
+        <h2>✅ Verifica che Funzioni</h2>
+
+        <div class="step-box">
+            <ol>
+                <li>Assicurati che il file watcher sia in esecuzione (<code>.\file-watcher.ps1</code>)</li>
+                <li>Modifica un file (es. aggiungi un commento in <code>index.html</code>)</li>
+                <li>Salva il file in Cursor (CTRL+S)</li>
+                <li>Nel terminale del file watcher vedrai un messaggio tipo:
+                    <code>[14:30:25] 📝 File modificato: index.html</code>
+                </li>
+                <li>Dopo 5 secondi vedrai:
+                    <code>[Auto-Sync] ✓ Commit eseguito con successo<br>[Auto-Sync] ✓ Push completato con successo!</code>
+                </li>
+                <li>Controlla su GitHub che le modifiche siano state caricate!</li>
+            </ol>
+        </div>
+
+        <h2>❓ Risoluzione Problemi</h2>
+
+        <div class="warning">
+            <h3>"git non è riconosciuto"</h3>
+            <p><strong>Soluzione:</strong> Installa Git da https://git-scm.com/download/win e riavvia Cursor</p>
+        </div>
+
+        <div class="warning">
+            <h3>"Repository remoto non configurato"</h3>
+            <p><strong>Soluzione:</strong></p>
+            <code>git remote add origin https://github.com/TUOUSERNANE/NOME-REPO.git</code>
+            <p style="margin-top: 10px;">Per verificare:</p>
+            <code>git remote -v</code>
+        </div>
+
+        <div class="warning">
+            <h3>"Errore di autenticazione durante push"</h3>
+            <p><strong>Soluzione:</strong> GitHub richiede autenticazione. Opzioni:</p>
+            <ul>
+                <li><strong>Personal Access Token:</strong> GitHub → Settings → Developer settings → Personal access tokens → Genera token con permessi "repo"</li>
+                <li><strong>GitHub CLI:</strong> <code>winget install --id GitHub.cli</code> poi <code>gh auth login</code></li>
+                <li><strong>Git Credential Manager:</strong> Git for Windows lo include - usalo quando richiesto</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>"File watcher non rileva modifiche"</h3>
+            <p><strong>Possibili cause:</strong></p>
+            <ul>
+                <li>Lo script è stato chiuso → Riavvia <code>.\file-watcher.ps1</code></li>
+                <li>File salvati in sottocartelle → Il watcher monitora solo la cartella principale</li>
+                <li>Permessi insufficienti → Esegui PowerShell come amministratore</li>
+            </ul>
+        </div>
+
+        <h2>🔐 Sicurezza</h2>
+
+        <div class="warning">
+            <strong>⚠️ Attenzione:</strong>
+            <ul>
+                <li>Il commit automatico non verifica cosa stai committando</li>
+                <li>Evita di committare file sensibili (password, chiavi API, ecc.)</li>
+                <li>Usa <code>.gitignore</code> per escludere file che non vuoi committare</li>
+            </ul>
+        </div>
+
+        <h2>📚 Documentazione</h2>
+
+        <div class="info">
+            <p>Per dettagli completi, consulta:</p>
+            <ul>
+                <li><code>CONFIGURA_AUTO_SYNC.md</code> - Guida completa e dettagliata</li>
+                <li><code>QUICK_START_AUTO_SYNC.md</code> - Guida rapida</li>
+            </ul>
+        </div>
+
+        <div class="success" style="margin-top: 40px; text-align: center; padding: 30px;">
+            <h2>🚀 Pronto a Iniziare?</h2>
+            <p style="margin: 20px 0;">Esegui lo script di setup e avvia la sincronizzazione automatica!</p>
+            <code style="display: block; text-align: left; margin: 20px auto; max-width: 500px;">
+                cd C:\Users\Matteo\.cursor<br>
+                .\setup-auto-sync-github.ps1
+            </code>
+        </div>
+    </div>
+</body>
+</html>
+

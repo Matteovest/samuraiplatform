@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Carrello - Enoteca L'Angolo del Vino. Gestisci i tuoi vini selezionati.">
+    <title>Carrello - L'Angolo del Vino</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>L'Angolo del Vino</h1>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                <li><a href="prodotti.html">Prodotti</a></li>
+                <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                <li><a href="bollicine.html">Bollicine</a></li>
+                <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                <li><a href="contatti.html">Contatti</a></li>
+            </ul>
+            <div class="cart-icon-container">
+                <a href="carrello.html" class="cart-icon" id="cartIcon">
+                    🛒 <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Carrello -->
+    <section class="section" style="padding-top: 8rem;">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); flex-wrap: wrap; gap: var(--space-md);">
+                <h2 class="section-title" style="margin: 0;">Il Tuo Carrello</h2>
+                <button class="btn btn-primary" id="clearCartBtnTop" style="display: none;">🗑️ Svuota Carrello</button>
+            </div>
+            <div id="cartContent">
+                <div id="cartItems" class="cart-items">
+                    <p class="empty-cart-message">Il tuo carrello è vuoto. Aggiungi alcuni vini per iniziare!</p>
+                </div>
+                <div id="cartSummary" class="cart-summary" style="display: none;">
+                    <div class="cart-totals">
+                        <div class="cart-total-item">
+                            <span>Totale:</span>
+                            <span id="cartTotal">€0,00</span>
+                        </div>
+                    </div>
+                    <div class="cart-actions">
+                        <button class="btn btn-primary" id="checkoutBtn">Procedi all'Ordine</button>
+                        <button class="btn btn-primary" id="clearCartBtn">🗑️ Svuota Carrello</button>
+                    </div>
+                    <p class="cart-note">Per completare l'ordine, contattaci telefonicamente o vieni a trovarci in negozio.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>L'Angolo del Vino</h3>
+                    <p>La passione per il vino del territorio laziale è il nostro pane quotidiano. Ogni bottiglia e ogni litro di vino sfuso che selezioniamo racconta una storia, ogni produttore locale con cui collaboriamo condivide la nostra visione: valorizzare l'autenticità, la qualità e la tradizione del Viterbese.</p>
+                    <p style="margin-top: 10px;"><strong>Vini sfusi da:</strong> Le Lase (Orte), Stefanoni (Montefiascone), Castelli (Marta) e Cantina Simoncini (Cellere).</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Iscriviti per ricevere:</p>
+                    <ul>
+                        <li>Le ultime novità in negozio</li>
+                        <li>Offerte speciali riservate agli iscritti</li>
+                        <li>Consigli stagionali e abbinamenti</li>
+                        <li>Informazioni su nuovi arrivi</li>
+                    </ul>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="La tua email" required>
+                        <button type="submit" class="btn btn-primary">Iscriviti</button>
+                    </form>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Link Rapidi</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="chi-siamo.html">Chi Siamo</a></li>
+                        <li><a href="prodotti.html">Prodotti</a></li>
+                        <li><a href="vini-rossi.html">Vini Rossi</a></li>
+                        <li><a href="vini-bianchi.html">Vini Bianchi</a></li>
+                        <li><a href="bollicine.html">Bollicine</a></li>
+                        <li><a href="vino-sfuso.html">Vino Sfuso</a></li>
+                        <li><a href="contatti.html">Contatti</a></li>
+                        <li><a href="carrello.html">Carrello</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Seguici</h4>
+                    <p>Seguici su [Facebook/Instagram] per restare sempre aggiornato sulle nostre attività, scoperte del territorio e novità enologiche.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 L'Angolo del Vino - Via del Santuario, 8 - La Quercia, Viterbo. Tutti i diritti riservati.</p>
+                <p style="margin-top: 10px;">Tel: <a href="tel:+393402143560" style="color: rgba(255,255,255,0.8);">340 214 3560</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
