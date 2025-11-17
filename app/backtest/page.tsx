@@ -72,16 +72,17 @@ export default function BacktestPage() {
     'Fibonacci',
   ]
 
-  // Calcola profit basato su risk per trade e stop loss/take profit
+  // Calcola profit basato su risk % del capitale corrente (interesse composto)
   const calculateTradeProfit = (isWin: boolean, currentCapital: number) => {
+    // Rischio % del capitale corrente (interesse composto)
     const riskAmount = (currentCapital * settings.riskPerTrade) / 100
-    const riskRewardRatio = settings.takeProfit / settings.stopLoss
+    const riskRewardRatio = settings.stopLoss > 0 ? settings.takeProfit / settings.stopLoss : 1
     
     if (isWin) {
-      // Profit = risk amount * risk/reward ratio
+      // Profit = risk amount * risk/reward ratio - commissione
       return riskAmount * riskRewardRatio - settings.commission
     } else {
-      // Loss = risk amount
+      // Loss = risk amount + commissione
       return -riskAmount - settings.commission
     }
   }
@@ -237,15 +238,41 @@ export default function BacktestPage() {
                   </select>
                 </div>
 
-                {/* Quick Settings */}
+                {/* Risk Management Settings */}
                 <div className="pt-4 border-t">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-700">Impostazioni Rapide</h3>
+                  <h3 className="text-sm font-semibold mb-3 text-gray-700">Risk Management</h3>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-2 text-gray-600">
+                        Capitale Iniziale (€)
+                      </label>
+                      <input
+                        type="number"
+                        value={settings.initialCapital}
+                        onChange={(e) => {
+                          const newCapital = parseFloat(e.target.value) || 0
+                          setSettings({ ...settings, initialCapital: newCapital })
+                          // Reset stats con nuovo capitale
+                          if (!isRunning) {
+                            setStats(prev => ({
+                              ...prev,
+                              currentCapital: newCapital,
+                              totalProfit: 0,
+                            }))
+                          }
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        min="100"
+                        step="100"
+                        disabled={isRunning}
+                      />
+                    </div>
+
                     <div>
                       <div className="flex justify-between mb-1">
                         <label className="block text-xs font-medium text-gray-600">
-                          Rischio per Trade
+                          Rischio per Trade (% del capitale)
                         </label>
                         <span className="text-xs font-bold text-primary-600">
                           {settings.riskPerTrade}%
@@ -268,76 +295,52 @@ export default function BacktestPage() {
                         <span>0.5%</span>
                         <span>5%</span>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Percentuale del capitale corrente rischiata per ogni trade (interesse composto)
+                      </p>
                     </div>
 
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium text-gray-600">
-                          Stop Loss
-                        </label>
-                        <span className="text-xs font-bold text-red-600">
-                          {settings.stopLoss} pips
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="100"
-                        step="5"
-                        value={settings.stopLoss}
-                        onChange={(e) => {
-                          const newSL = parseFloat(e.target.value)
-                          setSettings({ ...settings, stopLoss: newSL })
-                        }}
-                        className="w-full"
-                        disabled={isRunning}
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>5</span>
-                        <span>100</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium text-gray-600">
-                          Take Profit
-                        </label>
-                        <span className="text-xs font-bold text-green-600">
-                          {settings.takeProfit} pips
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="200"
-                        step="5"
-                        value={settings.takeProfit}
-                        onChange={(e) => {
-                          const newTP = parseFloat(e.target.value)
-                          setSettings({ ...settings, takeProfit: newTP })
-                        }}
-                        className="w-full"
-                        disabled={isRunning}
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>10</span>
-                        <span>200</span>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <div className="text-xs font-medium text-blue-900 mb-2">Calcolo Rischio</div>
+                      <div className="space-y-1 text-xs text-blue-800">
+                        <div className="flex justify-between">
+                          <span>Capitale Attuale:</span>
+                          <span className="font-bold">
+                            €{stats.currentCapital.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Rischio per Trade:</span>
+                          <span className="font-bold text-red-600">
+                            €{((stats.currentCapital * settings.riskPerTrade) / 100).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Potenziale Profit (R:R {settings.stopLoss > 0 ? (settings.takeProfit / settings.stopLoss).toFixed(2) : '0'}:1):</span>
+                          <span className="font-bold text-green-600">
+                            €{((stats.currentCapital * settings.riskPerTrade * (settings.stopLoss > 0 ? settings.takeProfit / settings.stopLoss : 1)) / 100).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-3 mt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-medium text-gray-600">R:R Ratio</span>
-                        <span className="text-sm font-bold text-primary-600">
-                          {settings.stopLoss > 0 ? (settings.takeProfit / settings.stopLoss).toFixed(2) : '0'} : 1
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs font-medium text-gray-600">Capitale Iniziale</span>
-                        <span className="text-sm font-bold">
-                          €{settings.initialCapital.toLocaleString('it-IT')}
-                        </span>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-xs font-medium text-gray-700 mb-2">Parametri Strategia</div>
+                      <div className="space-y-2 text-xs text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Stop Loss:</span>
+                          <span className="font-semibold">{settings.stopLoss} pips</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Take Profit:</span>
+                          <span className="font-semibold">{settings.takeProfit} pips</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>R:R Ratio:</span>
+                          <span className="font-bold text-primary-600">
+                            {settings.stopLoss > 0 ? (settings.takeProfit / settings.stopLoss).toFixed(2) : '0'} : 1
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
