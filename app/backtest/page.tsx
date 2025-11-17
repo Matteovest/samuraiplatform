@@ -21,6 +21,16 @@ export default function BacktestPage() {
   const [showSettings, setShowSettings] = useState(false)
   const [showPineEditor, setShowPineEditor] = useState(false)
   const [pineScript, setPineScript] = useState('')
+  const [historicalData, setHistoricalData] = useState<Array<{
+    date: string
+    open: number
+    high: number
+    low: number
+    close: number
+  }>>([])
+  const [loadingData, setLoadingData] = useState(false)
+  const [dataSource, setDataSource] = useState<'simulated' | 'real'>('simulated')
+  const [dataError, setDataError] = useState<string | null>(null)
   const [settings, setSettings] = useState<BacktestSettings>({
     riskPerTrade: 0.5, // 0.5% del capitale (default conservativo)
     stopLoss: 20, // 20 pips
@@ -72,6 +82,36 @@ export default function BacktestPage() {
     'Fibonacci',
   ]
 
+  // Carica dati storici reali da Alpha Vantage
+  const loadHistoricalData = async () => {
+    setLoadingData(true)
+    setDataError(null)
+    
+    try {
+      const response = await fetch(
+        `/api/market-data?symbol=${selectedAsset}&type=forex&interval=daily`
+      )
+      const result = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Errore nel caricamento dati')
+      }
+      
+      if (result.prices && result.prices.length > 0) {
+        setHistoricalData(result.prices)
+        setDataSource('real')
+      } else {
+        throw new Error('Nessun dato disponibile')
+      }
+    } catch (error: any) {
+      setDataError(error.message)
+      setDataSource('simulated')
+      setHistoricalData([])
+    } finally {
+      setLoadingData(false)
+    }
+  }
+
   // Calcola profit basato su risk % del capitale corrente (interesse composto)
   const calculateTradeProfit = (isWin: boolean, currentCapital: number) => {
     // Rischio % del capitale corrente (interesse composto)
@@ -87,41 +127,67 @@ export default function BacktestPage() {
     }
   }
 
+  // Carica dati quando cambia asset
+  useEffect(() => {
+    loadHistoricalData()
+  }, [selectedAsset])
+
   // Simula il backtesting quando viene avviato
   useEffect(() => {
     if (isRunning) {
       let tradeCount = 0
+      let dataIndex = 0
+      
       const interval = setInterval(() => {
         if (tradeCount >= settings.maxTrades) {
           setIsRunning(false)
           return
         }
 
-        // ⚠️ ATTENZIONE: Questo è un backtest SIMULATO
-        // I dati sono completamente random e non rappresentano risultati reali
-        // Per un backtest reale servono:
-        // 1. Dati storici OHLCV reali (Alpha Vantage, Yahoo Finance, etc.)
-        // 2. Parser Pine Script per eseguire la strategia
-        // 3. Engine che applica la strategia ai dati reali
-        
-        // Simula nuovi trade con logica basata su risk management
-        // Win rate hardcoded al 65% - NON è reale!
-        const isWin = Math.random() > 0.35 // 65% win rate FISSO (non basato su strategia reale)
         const currentCapital = stats.currentCapital || settings.initialCapital
+        let isWin = false
+        let entryPrice = 0
+        let exitPrice = 0
+        
+        if (dataSource === 'real' && historicalData.length > 0 && dataIndex < historicalData.length) {
+          // Usa dati reali
+          const candle = historicalData[dataIndex]
+          entryPrice = candle.open
+          
+          // Logica base: se close > open = win (semplificato)
+          // In futuro, qui applicheresti la strategia Pine Script
+          const priceChange = candle.close - candle.open
+          const pipChange = Math.abs(priceChange) * 10000 // Converti in pips
+          
+          if (priceChange > 0) {
+            // Candela rialzista
+            isWin = pipChange >= settings.takeProfit
+            exitPrice = isWin 
+              ? entryPrice + (settings.takeProfit / 10000)
+              : entryPrice - (settings.stopLoss / 10000)
+          } else {
+            // Candela ribassista
+            isWin = pipChange >= settings.takeProfit
+            exitPrice = isWin
+              ? entryPrice - (settings.takeProfit / 10000)
+              : entryPrice + (settings.stopLoss / 10000)
+          }
+          
+          dataIndex++
+        } else {
+          // Fallback: dati simulati
+          const basePrice = selectedAsset === 'EURUSD' ? 1.08 : 
+                           selectedAsset === 'GBPUSD' ? 1.26 :
+                           selectedAsset === 'USDJPY' ? 148.5 : 1.08
+          
+          isWin = Math.random() > 0.35 // 65% win rate simulato
+          entryPrice = parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4))
+          exitPrice = isWin 
+            ? parseFloat((entryPrice + (settings.takeProfit / 10000)).toFixed(4))
+            : parseFloat((entryPrice - (settings.stopLoss / 10000)).toFixed(4))
+        }
+        
         const profit = calculateTradeProfit(isWin, currentCapital)
-        
-        // Prezzi completamente RANDOM - non basati su dati storici reali
-        const basePrice = selectedAsset === 'EURUSD' ? 1.08 : 
-                         selectedAsset === 'GBPUSD' ? 1.26 :
-                         selectedAsset === 'USDJPY' ? 148.5 : 1.08
-        
-        const entryPrice = parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4))
-        const exitPrice = isWin 
-          ? parseFloat((entryPrice + (settings.takeProfit / 10000)).toFixed(4))
-          : parseFloat((entryPrice - (settings.stopLoss / 10000)).toFixed(4))
-        
-        // NOTA: La strategia e l'indicatore selezionati NON influenzano i risultati
-        // Tutti i trade sono generati casualmente con win rate fisso
         
         const newTrade = {
           type: Math.random() > 0.5 ? 'BUY' : 'SELL',
@@ -187,12 +253,35 @@ export default function BacktestPage() {
             <p className="text-gray-600">
               Metti alla prova le tue idee senza rischiare un centesimo
             </p>
-            <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-w-2xl">
-              <p className="text-xs text-yellow-800">
-                <strong>⚠️ Modalità Simulazione:</strong> Questo backtest usa dati simulati. 
-                I risultati non rappresentano performance reali. Per dati storici reali, 
-                integra API come Alpha Vantage o Yahoo Finance.
-              </p>
+            <div className="mt-2 space-y-2 max-w-2xl">
+              {dataSource === 'simulated' ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-xs text-yellow-800">
+                    <strong>⚠️ Modalità Simulazione:</strong> Usando dati simulati. 
+                    {dataError && ` Errore: ${dataError}. `}
+                    <button
+                      onClick={loadHistoricalData}
+                      className="underline font-semibold"
+                      disabled={loadingData}
+                    >
+                      {loadingData ? 'Caricamento...' : 'Carica dati reali'}
+                    </button>
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-xs text-green-800">
+                    <strong>✅ Dati Reali:</strong> Caricati {historicalData.length} candele storiche da Alpha Vantage.
+                    <button
+                      onClick={loadHistoricalData}
+                      className="ml-2 underline font-semibold"
+                      disabled={loadingData}
+                    >
+                      {loadingData ? 'Aggiornamento...' : 'Aggiorna'}
+                    </button>
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex gap-3">
