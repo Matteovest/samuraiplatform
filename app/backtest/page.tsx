@@ -45,7 +45,7 @@ export default function BacktestPage() {
         
         const newTrade = {
           type: Math.random() > 0.5 ? 'BUY' : 'SELL',
-          price: (parseFloat(basePrice) + (Math.random() - 0.5) * 0.01).toFixed(4),
+          price: (basePrice + (Math.random() - 0.5) * 0.01).toFixed(4),
           profit: profit,
           time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
         }
