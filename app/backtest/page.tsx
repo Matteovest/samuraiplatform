@@ -208,6 +208,7 @@ export default function BacktestPage() {
                     value={selectedAsset}
                     onChange={(e) => setSelectedAsset(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    disabled={isRunning}
                   >
                     {assets.map((asset) => (
                       <option key={asset} value={asset}>
@@ -225,6 +226,7 @@ export default function BacktestPage() {
                     value={selectedIndicator}
                     onChange={(e) => setSelectedIndicator(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    disabled={isRunning}
                   >
                     <option value="">Nessuno</option>
                     {indicators.map((indicator) => (
@@ -233,6 +235,112 @@ export default function BacktestPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Quick Settings */}
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-semibold mb-3 text-gray-700">Impostazioni Rapide</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <label className="block text-xs font-medium text-gray-600">
+                          Rischio per Trade
+                        </label>
+                        <span className="text-xs font-bold text-primary-600">
+                          {settings.riskPerTrade}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="5"
+                        step="0.1"
+                        value={settings.riskPerTrade}
+                        onChange={(e) => {
+                          const newRisk = parseFloat(e.target.value)
+                          setSettings({ ...settings, riskPerTrade: newRisk })
+                        }}
+                        className="w-full"
+                        disabled={isRunning}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0.5%</span>
+                        <span>5%</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <label className="block text-xs font-medium text-gray-600">
+                          Stop Loss
+                        </label>
+                        <span className="text-xs font-bold text-red-600">
+                          {settings.stopLoss} pips
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="5"
+                        max="100"
+                        step="5"
+                        value={settings.stopLoss}
+                        onChange={(e) => {
+                          const newSL = parseFloat(e.target.value)
+                          setSettings({ ...settings, stopLoss: newSL })
+                        }}
+                        className="w-full"
+                        disabled={isRunning}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>5</span>
+                        <span>100</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <label className="block text-xs font-medium text-gray-600">
+                          Take Profit
+                        </label>
+                        <span className="text-xs font-bold text-green-600">
+                          {settings.takeProfit} pips
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="200"
+                        step="5"
+                        value={settings.takeProfit}
+                        onChange={(e) => {
+                          const newTP = parseFloat(e.target.value)
+                          setSettings({ ...settings, takeProfit: newTP })
+                        }}
+                        className="w-full"
+                        disabled={isRunning}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>10</span>
+                        <span>200</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-3 mt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-gray-600">R:R Ratio</span>
+                        <span className="text-sm font-bold text-primary-600">
+                          {settings.stopLoss > 0 ? (settings.takeProfit / settings.stopLoss).toFixed(2) : '0'} : 1
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs font-medium text-gray-600">Capitale Iniziale</span>
+                        <span className="text-sm font-bold">
+                          €{settings.initialCapital.toLocaleString('it-IT')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -564,10 +672,25 @@ export default function BacktestPage() {
 
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() => setShowSettings(false)}
+                  onClick={() => {
+                    // Reset stats quando si cambiano le impostazioni
+                    setStats({
+                      winRate: 0,
+                      profitFactor: 0,
+                      totalTrades: 0,
+                      maxDrawdown: 0,
+                      totalProfit: 0,
+                      currentCapital: settings.initialCapital,
+                      avgWin: 0,
+                      avgLoss: 0,
+                    })
+                    setTrades([])
+                    setIsRunning(false)
+                    setShowSettings(false)
+                  }}
                   className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
                 >
-                  Salva
+                  Salva e Reset
                 </button>
                 <button
                   onClick={() => setShowSettings(false)}
