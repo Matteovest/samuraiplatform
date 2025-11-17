@@ -97,11 +97,20 @@ export default function BacktestPage() {
           return
         }
 
+        // ⚠️ ATTENZIONE: Questo è un backtest SIMULATO
+        // I dati sono completamente random e non rappresentano risultati reali
+        // Per un backtest reale servono:
+        // 1. Dati storici OHLCV reali (Alpha Vantage, Yahoo Finance, etc.)
+        // 2. Parser Pine Script per eseguire la strategia
+        // 3. Engine che applica la strategia ai dati reali
+        
         // Simula nuovi trade con logica basata su risk management
-        const isWin = Math.random() > 0.35 // 65% win rate (modificabile con Pine Script)
+        // Win rate hardcoded al 65% - NON è reale!
+        const isWin = Math.random() > 0.35 // 65% win rate FISSO (non basato su strategia reale)
         const currentCapital = stats.currentCapital || settings.initialCapital
         const profit = calculateTradeProfit(isWin, currentCapital)
         
+        // Prezzi completamente RANDOM - non basati su dati storici reali
         const basePrice = selectedAsset === 'EURUSD' ? 1.08 : 
                          selectedAsset === 'GBPUSD' ? 1.26 :
                          selectedAsset === 'USDJPY' ? 148.5 : 1.08
@@ -110,6 +119,9 @@ export default function BacktestPage() {
         const exitPrice = isWin 
           ? parseFloat((entryPrice + (settings.takeProfit / 10000)).toFixed(4))
           : parseFloat((entryPrice - (settings.stopLoss / 10000)).toFixed(4))
+        
+        // NOTA: La strategia e l'indicatore selezionati NON influenzano i risultati
+        // Tutti i trade sono generati casualmente con win rate fisso
         
         const newTrade = {
           type: Math.random() > 0.5 ? 'BUY' : 'SELL',
@@ -175,6 +187,13 @@ export default function BacktestPage() {
             <p className="text-gray-600">
               Metti alla prova le tue idee senza rischiare un centesimo
             </p>
+            <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-w-2xl">
+              <p className="text-xs text-yellow-800">
+                <strong>⚠️ Modalità Simulazione:</strong> Questo backtest usa dati simulati. 
+                I risultati non rappresentano performance reali. Per dati storici reali, 
+                integra API come Alpha Vantage o Yahoo Finance.
+              </p>
+            </div>
           </div>
           <div className="flex gap-3">
             <button
