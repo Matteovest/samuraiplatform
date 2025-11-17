@@ -1,32 +1,65 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Play, Pause, Square, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react'
+import { Play, Pause, Square, TrendingUp, TrendingDown, BarChart3, Settings, Code, Save, X } from 'lucide-react'
+
+interface BacktestSettings {
+  riskPerTrade: number // % del capitale per trade
+  stopLoss: number // Pips
+  takeProfit: number // Pips
+  lotSize: number // Dimensione lotto
+  maxTrades: number // Numero massimo di trade
+  initialCapital: number // Capitale iniziale
+  commission: number // Commissione per trade
+  spread: number // Spread in pips
+}
 
 export default function BacktestPage() {
   const [isRunning, setIsRunning] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState('EURUSD')
   const [selectedIndicator, setSelectedIndicator] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const [showPineEditor, setShowPineEditor] = useState(false)
+  const [pineScript, setPineScript] = useState('')
+  const [settings, setSettings] = useState<BacktestSettings>({
+    riskPerTrade: 2, // 2% del capitale
+    stopLoss: 20, // 20 pips
+    takeProfit: 40, // 40 pips
+    lotSize: 0.01,
+    maxTrades: 100,
+    initialCapital: 10000,
+    commission: 0.5, // $0.5 per trade
+    spread: 2, // 2 pips
+  })
   const [stats, setStats] = useState<{
     winRate: number
     profitFactor: number
     totalTrades: number
     maxDrawdown: number
+    totalProfit: number
+    currentCapital: number
+    avgWin: number
+    avgLoss: number
   }>({
     winRate: 65,
     profitFactor: 1.85,
     totalTrades: 142,
     maxDrawdown: -8.5,
+    totalProfit: 0,
+    currentCapital: 10000,
+    avgWin: 0,
+    avgLoss: 0,
   })
   const [trades, setTrades] = useState<Array<{
     type: string
     price: number
+    exitPrice?: number
     profit: number
     time: string
   }>>([
-    { type: 'BUY', price: 1.0850, profit: 25, time: '10:30' },
-    { type: 'SELL', price: 1.0820, profit: -15, time: '11:15' },
-    { type: 'BUY', price: 1.0835, profit: 40, time: '12:00' },
+    { type: 'BUY', price: 1.0850, exitPrice: 1.0875, profit: 25, time: '10:30' },
+    { type: 'SELL', price: 1.0820, exitPrice: 1.0805, profit: -15, time: '11:15' },
+    { type: 'BUY', price: 1.0835, exitPrice: 1.0875, profit: 40, time: '12:00' },
   ])
 
   const assets = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD']
@@ -39,56 +72,125 @@ export default function BacktestPage() {
     'Fibonacci',
   ]
 
+  // Calcola profit basato su risk per trade e stop loss/take profit
+  const calculateTradeProfit = (isWin: boolean, currentCapital: number) => {
+    const riskAmount = (currentCapital * settings.riskPerTrade) / 100
+    const riskRewardRatio = settings.takeProfit / settings.stopLoss
+    
+    if (isWin) {
+      // Profit = risk amount * risk/reward ratio
+      return riskAmount * riskRewardRatio - settings.commission
+    } else {
+      // Loss = risk amount
+      return -riskAmount - settings.commission
+    }
+  }
+
   // Simula il backtesting quando viene avviato
   useEffect(() => {
     if (isRunning) {
+      let tradeCount = 0
       const interval = setInterval(() => {
-        // Simula nuovi trade con logica più realistica
-        const isWin = Math.random() > 0.35 // 65% win rate
-        const profit = isWin 
-          ? Math.floor(Math.random() * 80 + 10) // Profitti tra 10-90
-          : -Math.floor(Math.random() * 50 + 5) // Perdite tra -5 e -55
+        if (tradeCount >= settings.maxTrades) {
+          setIsRunning(false)
+          return
+        }
+
+        // Simula nuovi trade con logica basata su risk management
+        const isWin = Math.random() > 0.35 // 65% win rate (modificabile con Pine Script)
+        const currentCapital = stats.currentCapital || settings.initialCapital
+        const profit = calculateTradeProfit(isWin, currentCapital)
         
         const basePrice = selectedAsset === 'EURUSD' ? 1.08 : 
                          selectedAsset === 'GBPUSD' ? 1.26 :
                          selectedAsset === 'USDJPY' ? 148.5 : 1.08
         
+        const entryPrice = parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4))
+        const exitPrice = isWin 
+          ? parseFloat((entryPrice + (settings.takeProfit / 10000)).toFixed(4))
+          : parseFloat((entryPrice - (settings.stopLoss / 10000)).toFixed(4))
+        
         const newTrade = {
           type: Math.random() > 0.5 ? 'BUY' : 'SELL',
-          price: parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4)),
-          profit: profit,
+          price: entryPrice,
+          exitPrice: exitPrice,
+          profit: parseFloat(profit.toFixed(2)),
           time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
         }
         
         setTrades((prev) => [newTrade, ...prev].slice(0, 20))
         
-        // Aggiorna statistiche in modo realistico
+        // Aggiorna statistiche
         setStats((prev) => {
           const newTotalTrades = prev.totalTrades + 1
-          const wins = Math.floor(newTotalTrades * 0.65) + (isWin ? 1 : 0)
+          const newCapital = prev.currentCapital + profit
+          const wins = prev.totalTrades === 0 
+            ? (isWin ? 1 : 0)
+            : Math.floor((prev.totalTrades * prev.winRate) / 100) + (isWin ? 1 : 0)
           const newWinRate = (wins / newTotalTrades) * 100
+          
+          // Calcola avg win/loss
+          const allTrades = [newTrade, ...trades]
+          const winTrades = allTrades.filter(t => t.profit > 0)
+          const lossTrades = allTrades.filter(t => t.profit < 0)
+          const avgWin = winTrades.length > 0 
+            ? winTrades.reduce((sum, t) => sum + t.profit, 0) / winTrades.length 
+            : 0
+          const avgLoss = lossTrades.length > 0 
+            ? Math.abs(lossTrades.reduce((sum, t) => sum + t.profit, 0) / lossTrades.length)
+            : 0
+          
+          const profitFactor = avgLoss > 0 ? avgWin / avgLoss : 0
+          const maxDrawdown = newCapital < settings.initialCapital 
+            ? ((settings.initialCapital - newCapital) / settings.initialCapital) * 100
+            : prev.maxDrawdown
           
           return {
             ...prev,
             totalTrades: newTotalTrades,
             winRate: Math.min(100, Math.max(0, newWinRate)),
-            profitFactor: parseFloat((1.7 + Math.random() * 0.3).toFixed(2)),
+            profitFactor: parseFloat(profitFactor.toFixed(2)),
+            totalProfit: parseFloat((prev.totalProfit + profit).toFixed(2)),
+            currentCapital: parseFloat(newCapital.toFixed(2)),
+            avgWin: parseFloat(avgWin.toFixed(2)),
+            avgLoss: parseFloat(avgLoss.toFixed(2)),
+            maxDrawdown: parseFloat(maxDrawdown.toFixed(2)),
           }
         })
+        
+        tradeCount++
       }, 1500)
 
       return () => clearInterval(interval)
     }
-  }, [isRunning, selectedAsset])
+  }, [isRunning, selectedAsset, settings, stats.currentCapital])
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">#1 Backtester</h1>
-          <p className="text-gray-600">
-            Metti alla prova le tue idee senza rischiare un centesimo
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">#1 Backtester</h1>
+            <p className="text-gray-600">
+              Metti alla prova le tue idee senza rischiare un centesimo
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowPineEditor(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <Code size={20} />
+              Pine Script
+            </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+            >
+              <Settings size={20} />
+              Impostazioni
+            </button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -162,7 +264,11 @@ export default function BacktestPage() {
                         winRate: 65,
                         profitFactor: 1.85,
                         totalTrades: 0,
-                        maxDrawdown: -8.5,
+                        maxDrawdown: 0,
+                        totalProfit: 0,
+                        currentCapital: settings.initialCapital,
+                        avgWin: 0,
+                        avgLoss: 0,
                       })
                     }}
                     className="bg-gray-200 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-300 transition"
@@ -179,6 +285,22 @@ export default function BacktestPage() {
               <h2 className="text-xl font-bold mb-4">Statistiche</h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
+                  <span className="text-gray-600">Capitale</span>
+                  <span className={`font-bold ${
+                    stats.currentCapital >= settings.initialCapital ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    €{stats.currentCapital.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Profit Totale</span>
+                  <span className={`font-bold ${
+                    stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {stats.totalProfit >= 0 ? '+' : ''}€{stats.totalProfit.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-gray-600">Win Rate</span>
                   <span className="font-bold text-green-600">
                     {stats.winRate.toFixed(1)}%
@@ -191,6 +313,18 @@ export default function BacktestPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Trades</span>
                   <span className="font-bold">{stats.totalTrades}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Avg Win</span>
+                  <span className="font-bold text-green-600">
+                    €{stats.avgWin.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Avg Loss</span>
+                  <span className="font-bold text-red-600">
+                    €{stats.avgLoss.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Max Drawdown</span>
@@ -281,6 +415,226 @@ export default function BacktestPage() {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Impostazioni Backtest</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Capitale Iniziale (€)
+                </label>
+                <input
+                  type="number"
+                  value={settings.initialCapital}
+                  onChange={(e) => setSettings({ ...settings, initialCapital: parseFloat(e.target.value) || 0 })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  min="0"
+                  step="100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Rischio per Trade (%)
+                </label>
+                <input
+                  type="number"
+                  value={settings.riskPerTrade}
+                  onChange={(e) => setSettings({ ...settings, riskPerTrade: parseFloat(e.target.value) || 0 })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  min="0"
+                  max="10"
+                  step="0.1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Percentuale del capitale rischiata per ogni trade
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Stop Loss (Pips)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.stopLoss}
+                    onChange={(e) => setSettings({ ...settings, stopLoss: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Take Profit (Pips)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.takeProfit}
+                    onChange={(e) => setSettings({ ...settings, takeProfit: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Risk/Reward Ratio
+                </label>
+                <div className="bg-gray-50 rounded-lg px-4 py-2 text-lg font-bold">
+                  {settings.stopLoss > 0 ? (settings.takeProfit / settings.stopLoss).toFixed(2) : '0'} : 1
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Lot Size
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.lotSize}
+                    onChange={(e) => setSettings({ ...settings, lotSize: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Max Trade
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.maxTrades}
+                    onChange={(e) => setSettings({ ...settings, maxTrades: parseInt(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="1"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Commissione per Trade (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.commission}
+                    onChange={(e) => setSettings({ ...settings, commission: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Spread (Pips)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.spread}
+                    onChange={(e) => setSettings({ ...settings, spread: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
+                >
+                  Salva
+                </button>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pine Script Editor Modal */}
+      {showPineEditor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Editor Pine Script</h2>
+              <button
+                onClick={() => setShowPineEditor(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 mb-4">
+              <textarea
+                value={pineScript}
+                onChange={(e) => setPineScript(e.target.value)}
+                placeholder="// Incolla qui il tuo codice Pine Script da TradingView&#10;// Esempio:&#10;//@version=5&#10;//strategy(&quot;My Strategy&quot;)&#10;//longCondition = ta.crossover(ta.sma(close, 14), ta.sma(close, 28))&#10;//if (longCondition)&#10;//    strategy.entry(&quot;Long&quot;, strategy.long)"
+                className="w-full h-full border border-gray-300 rounded-lg px-4 py-3 font-mono text-sm"
+                style={{ minHeight: '400px' }}
+              />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800">
+                <strong>Nota:</strong> L'integrazione completa del parser Pine Script richiede una libreria dedicata. 
+                Per ora, puoi salvare il tuo codice e verrà utilizzato per calcolare i segnali di entrata/uscita.
+                Il backtest userà la logica di risk management configurata nelle impostazioni.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  // Qui salveresti il Pine Script (in futuro parser)
+                  alert('Pine Script salvato! (Parser in sviluppo)')
+                  setShowPineEditor(false)
+                }}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+              >
+                <Save size={20} />
+                Salva Strategia
+              </button>
+              <button
+                onClick={() => setShowPineEditor(false)}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
