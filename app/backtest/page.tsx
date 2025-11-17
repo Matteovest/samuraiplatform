@@ -22,7 +22,7 @@ export default function BacktestPage() {
   const [showPineEditor, setShowPineEditor] = useState(false)
   const [pineScript, setPineScript] = useState('')
   const [settings, setSettings] = useState<BacktestSettings>({
-    riskPerTrade: 2, // 2% del capitale
+    riskPerTrade: 0.5, // 0.5% del capitale (default conservativo)
     stopLoss: 20, // 20 pips
     takeProfit: 40, // 40 pips
     lotSize: 0.01,
@@ -280,8 +280,8 @@ export default function BacktestPage() {
                       </div>
                       <input
                         type="range"
-                        min="0.5"
-                        max="5"
+                        min="0.1"
+                        max="1"
                         step="0.1"
                         value={settings.riskPerTrade}
                         onChange={(e) => {
@@ -292,8 +292,8 @@ export default function BacktestPage() {
                         disabled={isRunning}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>0.5%</span>
-                        <span>5%</span>
+                        <span>0.1%</span>
+                        <span>1%</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         Percentuale del capitale corrente rischiata per ogni trade (interesse composto)
@@ -563,10 +563,14 @@ export default function BacktestPage() {
                 <input
                   type="number"
                   value={settings.riskPerTrade}
-                  onChange={(e) => setSettings({ ...settings, riskPerTrade: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0
+                    const clampedValue = Math.min(1, Math.max(0.1, value))
+                    setSettings({ ...settings, riskPerTrade: clampedValue })
+                  }}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                  min="0"
-                  max="10"
+                  min="0.1"
+                  max="1"
                   step="0.1"
                 />
                 <p className="text-xs text-gray-500 mt-1">
