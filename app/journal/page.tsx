@@ -39,10 +39,16 @@ export default function JournalPage() {
 
   const stats = {
     totalTrades: trades.length,
-    winRate: 66.7,
-    totalProfit: 10,
-    avgWin: 20,
-    avgLoss: -30,
+    winRate: trades.length > 0 
+      ? (trades.filter(t => t.status === 'win').length / trades.length * 100).toFixed(1)
+      : 0,
+    totalProfit: trades.reduce((sum, t) => sum + t.profit, 0),
+    avgWin: trades.filter(t => t.status === 'win').length > 0
+      ? (trades.filter(t => t.status === 'win').reduce((sum, t) => sum + t.profit, 0) / trades.filter(t => t.status === 'win').length).toFixed(2)
+      : 0,
+    avgLoss: trades.filter(t => t.status === 'loss').length > 0
+      ? (trades.filter(t => t.status === 'loss').reduce((sum, t) => sum + t.profit, 0) / trades.filter(t => t.status === 'loss').length).toFixed(2)
+      : 0,
   }
 
   return (
@@ -56,11 +62,29 @@ export default function JournalPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button className="bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+            <button 
+              onClick={() => alert('Funzionalità di importazione in arrivo!')}
+              className="bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
+            >
               <Upload size={20} />
               Importa
             </button>
-            <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2">
+            <button 
+              onClick={() => {
+                const newTrade = {
+                  id: trades.length + 1,
+                  date: new Date().toISOString().split('T')[0],
+                  asset: 'EURUSD',
+                  type: 'BUY',
+                  entry: (1.08 + Math.random() * 0.01).toFixed(4),
+                  exit: (1.08 + Math.random() * 0.01).toFixed(4),
+                  profit: Math.floor(Math.random() * 100 - 30),
+                  status: Math.random() > 0.4 ? 'win' : 'loss',
+                }
+                setTrades([newTrade, ...trades])
+              }}
+              className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
+            >
               <Plus size={20} />
               Nuovo Trade
             </button>
@@ -92,14 +116,26 @@ export default function JournalPage() {
           </div>
           <div className="bg-white rounded-xl p-6 shadow">
             <div className="text-sm text-gray-600 mb-1">Profit Factor</div>
-            <div className="text-3xl font-bold">1.33</div>
+            <div className="text-3xl font-bold">
+              {trades.length > 0 && parseFloat(stats.avgWin) > 0 && parseFloat(stats.avgLoss) < 0
+                ? (Math.abs(parseFloat(stats.avgWin) / parseFloat(stats.avgLoss))).toFixed(2)
+                : '1.33'}
+            </div>
           </div>
         </div>
 
         {/* Filters */}
         <div className="bg-white rounded-xl p-4 mb-6 shadow flex items-center gap-4">
           <Filter size={20} className="text-gray-500" />
-          <select className="border border-gray-300 rounded-lg px-4 py-2">
+          <select 
+            onChange={(e) => {
+              const filtered = e.target.value === 'Tutti gli asset' 
+                ? trades 
+                : trades.filter(t => t.asset === e.target.value)
+              // Qui potresti aggiungere logica di filtraggio
+            }}
+            className="border border-gray-300 rounded-lg px-4 py-2"
+          >
             <option>Tutti gli asset</option>
             <option>EURUSD</option>
             <option>GBPUSD</option>
@@ -114,7 +150,22 @@ export default function JournalPage() {
             type="date"
             className="border border-gray-300 rounded-lg px-4 py-2"
           />
-          <button className="ml-auto bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2">
+          <button 
+            onClick={() => {
+              const csv = [
+                ['Data', 'Asset', 'Tipo', 'Entry', 'Exit', 'Profit/Loss', 'Status'],
+                ...trades.map(t => [t.date, t.asset, t.type, t.entry, t.exit, t.profit, t.status])
+              ].map(row => row.join(',')).join('\n')
+              
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `trades_${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+            }}
+            className="ml-auto bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2"
+          >
             <Download size={20} />
             Esporta
           </button>
