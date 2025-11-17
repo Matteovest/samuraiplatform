@@ -116,10 +116,179 @@ export default function JournalPage() {
     })
   }
 
+  const parseMT5CSV = (text: string) => {
+    const lines = text.split('\n').filter(line => line.trim())
+    
+    // Trova la riga dell'header (di solito contiene "Ticket" o "Time")
+    let headerIndex = -1
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].toLowerCase().includes('ticket') || lines[i].toLowerCase().includes('time')) {
+        headerIndex = i
+        break
+      }
+    }
+    
+    if (headerIndex === -1) return []
+    
+    const headers = lines[headerIndex].split(',').map(h => h.trim().toLowerCase())
+    const dataLines = lines.slice(headerIndex + 1)
+    
+    return dataLines
+      .filter(line => line.trim() && !line.toLowerCase().includes('balance') && !line.toLowerCase().includes('closed p/l'))
+      .map((line, index) => {
+        const values = line.split(',').map(v => v.trim())
+        
+        // Mappa le colonne MT5
+        const getValue = (possibleNames: string[]) => {
+          for (const name of possibleNames) {
+            const idx = headers.findIndex(h => h.includes(name))
+            if (idx >= 0 && values[idx]) return values[idx]
+          }
+          return ''
+        }
+        
+        const time = getValue(['time', 'data', 'date'])
+        const symbol = getValue(['symbol', 'asset', 'instrument'])
+        const type = getValue(['type', 'operation'])
+        const volume = getValue(['volume', 'size', 'lots'])
+        const priceOpen = getValue(['price', 'open', 'entry'])
+        const priceClose = getValue(['price.1', 'close', 'exit', 'price_1'])
+        const profit = getValue(['profit', 'p/l', 'pl'])
+        const swap = getValue(['swap', 'rollover'])
+        const commission = getValue(['commission', 'comm'])
+        
+        // Converti tipo MT5 (0=BUY, 1=SELL) o testo
+        let tradeType = 'BUY'
+        if (type === '1' || type.toLowerCase().includes('sell') || type.toLowerCase().includes('sell')) {
+          tradeType = 'SELL'
+        } else if (type === '0' || type.toLowerCase().includes('buy')) {
+          tradeType = 'BUY'
+        }
+        
+        // Parse date MT5 (formato: YYYY.MM.DD HH:MM:SS o YYYY-MM-DD)
+        let dateStr = time.split(' ')[0].replace(/\./g, '-')
+        if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // Prova altri formati
+          const dateMatch = time.match(/(\d{4})[.\-](\d{2})[.\-](\d{2})/)
+          if (dateMatch) {
+            dateStr = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`
+          } else {
+            dateStr = new Date().toISOString().split('T')[0]
+          }
+        }
+        
+        const entryPrice = parseFloat(priceOpen) || 0
+        const exitPrice = parseFloat(priceClose) || 0
+        const profitValue = parseFloat(profit) || 0
+        const swapValue = parseFloat(swap) || 0
+        const commValue = parseFloat(commission) || 0
+        const totalProfit = profitValue + swapValue + commValue
+        
+        return {
+          id: trades.length + index + 1,
+          date: dateStr,
+          asset: symbol || 'EURUSD',
+          type: tradeType,
+          entry: entryPrice,
+          exit: exitPrice,
+          profit: Math.round(totalProfit * 100) / 100,
+          status: totalProfit > 0 ? 'win' : 'loss',
+        }
+      })
+      .filter(trade => trade.entry > 0 && trade.exit > 0)
+  }
+
+  const parseMT5HTML = (html: string) => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const tables = doc.querySelectorAll('table')
+    
+    if (tables.length === 0) return []
+    
+    // Trova la tabella con i trade (di solito la prima o quella con più righe)
+    let tradeTable = tables[0]
+    for (const table of tables) {
+      if (table.rows.length > tradeTable.rows.length) {
+        tradeTable = table
+      }
+    }
+    
+    const rows = Array.from(tradeTable.rows)
+    if (rows.length < 2) return []
+    
+    // Trova header
+    const headerRow = rows[0]
+    const headers = Array.from(headerRow.cells).map(cell => cell.textContent?.trim().toLowerCase() || '')
+    
+    const dataRows = rows.slice(1)
+    
+    return dataRows
+      .filter(row => {
+        const text = row.textContent?.toLowerCase() || ''
+        return !text.includes('balance') && !text.includes('closed p/l') && !text.includes('total')
+      })
+      .map((row, index) => {
+        const cells = Array.from(row.cells).map(cell => cell.textContent?.trim() || '')
+        
+        const getValue = (possibleNames: string[]) => {
+          for (const name of possibleNames) {
+            const idx = headers.findIndex(h => h.includes(name))
+            if (idx >= 0 && cells[idx]) return cells[idx]
+          }
+          return ''
+        }
+        
+        const time = getValue(['time', 'data', 'date'])
+        const symbol = getValue(['symbol', 'asset', 'instrument'])
+        const type = getValue(['type', 'operation'])
+        const priceOpen = getValue(['price', 'open', 'entry'])
+        const priceClose = getValue(['price.1', 'close', 'exit', 'price_1', 'price s/l'])
+        const profit = getValue(['profit', 'p/l', 'pl'])
+        const swap = getValue(['swap', 'rollover'])
+        const commission = getValue(['commission', 'comm'])
+        
+        let tradeType = 'BUY'
+        if (type === '1' || type.toLowerCase().includes('sell')) {
+          tradeType = 'SELL'
+        } else if (type === '0' || type.toLowerCase().includes('buy')) {
+          tradeType = 'BUY'
+        }
+        
+        let dateStr = time.split(' ')[0].replace(/\./g, '-')
+        if (!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const dateMatch = time.match(/(\d{4})[.\-](\d{2})[.\-](\d{2})/)
+          if (dateMatch) {
+            dateStr = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`
+          } else {
+            dateStr = new Date().toISOString().split('T')[0]
+          }
+        }
+        
+        const entryPrice = parseFloat(priceOpen.replace(/[^\d.-]/g, '')) || 0
+        const exitPrice = parseFloat(priceClose.replace(/[^\d.-]/g, '')) || 0
+        const profitValue = parseFloat(profit.replace(/[^\d.-]/g, '')) || 0
+        const swapValue = parseFloat(swap.replace(/[^\d.-]/g, '')) || 0
+        const commValue = parseFloat(commission.replace(/[^\d.-]/g, '')) || 0
+        const totalProfit = profitValue + swapValue + commValue
+        
+        return {
+          id: trades.length + index + 1,
+          date: dateStr,
+          asset: symbol || 'EURUSD',
+          type: tradeType,
+          entry: entryPrice,
+          exit: exitPrice,
+          profit: Math.round(totalProfit * 100) / 100,
+          status: totalProfit > 0 ? 'win' : 'loss',
+        }
+      })
+      .filter(trade => trade.entry > 0 && trade.exit > 0)
+  }
+
   const handleImport = () => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.csv'
+    input.accept = '.csv,.html,.htm'
     input.onchange = (e: any) => {
       const file = e.target.files[0]
       if (!file) return
@@ -127,28 +296,50 @@ export default function JournalPage() {
       const reader = new FileReader()
       reader.onload = (event: any) => {
         const text = event.target.result
-        const lines = text.split('\n').slice(1) // Skip header
+        const fileName = file.name.toLowerCase()
         
-        const importedTrades = lines
-          .filter((line: string) => line.trim())
-          .map((line: string, index: number) => {
-            const [date, asset, type, entry, exit, profit, status] = line.split(',')
-            return {
-              id: trades.length + index + 1,
-              date: date.trim(),
-              asset: asset.trim(),
-              type: type.trim(),
-              entry: parseFloat(entry.trim()),
-              exit: parseFloat(exit.trim()),
-              profit: parseFloat(profit.trim()),
-              status: status.trim().toLowerCase(),
-            }
-          })
+        let importedTrades: any[] = []
+        
+        // Determina il tipo di file
+        if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+          // File HTML da MT5
+          importedTrades = parseMT5HTML(text)
+        } else if (fileName.endsWith('.csv')) {
+          // Prova prima come CSV MT5, poi come CSV generico
+          importedTrades = parseMT5CSV(text)
+          
+          // Se non ha trovato trade, prova formato CSV generico
+          if (importedTrades.length === 0) {
+            const lines = text.split('\n').slice(1)
+            importedTrades = lines
+              .filter((line: string) => line.trim())
+              .map((line: string, index: number) => {
+                const [date, asset, type, entry, exit, profit, status] = line.split(',')
+                if (!date || !asset) return null
+                return {
+                  id: trades.length + index + 1,
+                  date: date.trim(),
+                  asset: asset.trim(),
+                  type: type?.trim() || 'BUY',
+                  entry: parseFloat(entry?.trim() || '0'),
+                  exit: parseFloat(exit?.trim() || '0'),
+                  profit: parseFloat(profit?.trim() || '0'),
+                  status: (status?.trim().toLowerCase() || (parseFloat(profit?.trim() || '0') > 0 ? 'win' : 'loss')),
+                }
+              })
+              .filter((t: any) => t && t.entry > 0 && t.exit > 0)
+          }
+        }
+
+        if (importedTrades.length === 0) {
+          alert('Nessun trade trovato nel file. Assicurati che il file provenga da MetaTrader 5.')
+          return
+        }
 
         setTrades([...importedTrades, ...trades])
-        alert(`${importedTrades.length} trade importati con successo!`)
+        alert(`${importedTrades.length} trade importati con successo da MetaTrader 5!`)
       }
-      reader.readAsText(file)
+      reader.readAsText(file, 'UTF-8')
     }
     input.click()
   }
