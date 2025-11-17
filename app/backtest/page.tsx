@@ -13,7 +13,12 @@ export default function BacktestPage() {
     totalTrades: 142,
     maxDrawdown: -8.5,
   })
-  const [trades, setTrades] = useState([
+  const [trades, setTrades] = useState<Array<{
+    type: string
+    price: number
+    profit: number
+    time: string
+  }>>([
     { type: 'BUY', price: 1.0850, profit: 25, time: '10:30' },
     { type: 'SELL', price: 1.0820, profit: -15, time: '11:15' },
     { type: 'BUY', price: 1.0835, profit: 40, time: '12:00' },
@@ -45,7 +50,7 @@ export default function BacktestPage() {
         
         const newTrade = {
           type: Math.random() > 0.5 ? 'BUY' : 'SELL',
-          price: (basePrice + (Math.random() - 0.5) * 0.01).toFixed(4),
+          price: parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4)),
           profit: profit,
           time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
         }
