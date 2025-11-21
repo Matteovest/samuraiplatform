@@ -6,28 +6,42 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "bot": "tsx bot/index.ts",
+    "bot:dev": "tsx watch bot/index.ts",
+    "bot:setup": "tsx bot/setup-channels.ts"
   },
   "dependencies": {
-    "next": "^14.0.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.3.3",
+    "@notionhq/client": "^2.2.15",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
-    "tailwindcss": "^3.4.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
+    "axios": "^1.6.7",
+    "date-fns": "^3.0.6",
+    "dotenv": "^16.4.5",
     "framer-motion": "^10.16.16",
+    "fs-extra": "^11.2.0",
+    "input": "^1.0.1",
     "lucide-react": "^0.303.0",
+    "next": "^14.0.4",
+    "postcss": "^8.4.32",
+    "puppeteer": "^21.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "recharts": "^2.10.3",
-    "date-fns": "^3.0.6"
+    "sharp": "^0.33.2",
+    "tailwindcss": "^3.4.0",
+    "telegram": "^2.26.22",
+    "tesseract.js": "^5.0.4",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^4.39.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.6",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.4",
-    "@netlify/plugin-nextjs": "^4.39.0"
+    "tsx": "^4.7.1"
   }
 }
-

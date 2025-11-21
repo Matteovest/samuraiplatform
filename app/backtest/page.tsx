@@ -72,7 +72,7 @@ export default function BacktestPage() {
     { type: 'BUY', price: 1.0835, exitPrice: 1.0875, profit: 40, time: '12:00' },
   ])
 
-  const assets = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD']
+  const assets = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'XAUUSD', 'WTI', 'SPX', 'NDX', 'BTCUSD']
   const indicators = [
     'RSI',
     'MACD',
@@ -176,9 +176,20 @@ export default function BacktestPage() {
           dataIndex++
         } else {
           // Fallback: dati simulati
-          const basePrice = selectedAsset === 'EURUSD' ? 1.08 : 
-                           selectedAsset === 'GBPUSD' ? 1.26 :
-                           selectedAsset === 'USDJPY' ? 148.5 : 1.08
+          const basePrices: { [key: string]: number } = {
+            'EURUSD': 1.08,
+            'GBPUSD': 1.26,
+            'USDJPY': 148.5,
+            'AUDUSD': 0.67,
+            'USDCAD': 1.35,
+            'NZDUSD': 0.62,
+            'XAUUSD': 2650, // Oro
+            'WTI': 75.5, // Petrolio
+            'SPX': 4800, // S&P 500
+            'NDX': 16500, // NASDAQ
+            'BTCUSD': 45000, // Bitcoin
+          }
+          const basePrice = basePrices[selectedAsset] || 1.08
           
           isWin = Math.random() > 0.35 // 65% win rate simulato
           entryPrice = parseFloat((basePrice + (Math.random() - 0.5) * 0.01).toFixed(4))
